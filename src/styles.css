@@ -319,3 +319,11 @@ body {
   border-color: var(--accent);
   position: relative;
 }
+
+.time-readout {
+  margin-left: auto;
+  color: var(--dim);
+  font-family: var(--mono);
+  font-size: 12.5px;
+  font-variant-numeric: tabular-nums;
+}

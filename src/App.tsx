@@ -10,6 +10,11 @@ const trace = rawTrace as unknown as Trace;
 
 const SPEEDS = [0.5, 1, 2, 4];
 
+function fmt(ms: number): string {
+  const s = Math.floor(ms / 1000);
+  return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
+}
+
 export default function App() {
   const playback = usePlayback(trace.meta.duration_ms, true);
   const { toggle } = playback;
@@ -49,6 +54,12 @@ export default function App() {
             </button>
           ))}
         </div>
+        <button type="button" className="btn" onClick={playback.restart}>
+          Restart
+        </button>
+        <span className="time-readout">
+          {fmt(playback.vt)} / {fmt(trace.meta.duration_ms)}
+        </span>
       </div>
     </div>
   );
