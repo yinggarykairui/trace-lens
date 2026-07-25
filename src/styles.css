@@ -205,6 +205,18 @@ body {
   font-variant-numeric: tabular-nums;
 }
 
+/* ---- timeline ---- */
+
+.timeline {
+  width: 100%;
+  display: block;
+  margin-top: 4px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  cursor: crosshair;
+  touch-action: none; /* drag-to-seek on touch without scrolling the page */
+}
+
 /* ---- controls ---- */
 
 .controls {
