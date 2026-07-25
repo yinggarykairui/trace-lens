@@ -4,6 +4,7 @@ import type { Trace } from './types';
 import { projectState } from './project';
 import { usePlayback } from './usePlayback';
 import { Transcript } from './Transcript';
+import { Timeline } from './Timeline';
 
 const trace = rawTrace as unknown as Trace;
 
@@ -29,6 +30,7 @@ export default function App() {
         <span className="trace-title">{trace.meta.title}</span>
       </header>
       <Transcript items={items} />
+      <Timeline trace={trace} vt={playback.vt} onSeek={playback.seek} />
       <div className="controls">
         <button type="button" className="btn btn-play" onClick={toggle}>
           {playback.playing ? 'Pause' : 'Play'}
