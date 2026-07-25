@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { Item, ToolItem } from './project';
 
 function summarizeInput(input: Record<string, unknown>): string {
@@ -10,9 +10,15 @@ function summarizeInput(input: Record<string, unknown>): string {
 }
 
 function ToolCard({ item }: { item: ToolItem }) {
+  const [open, setOpen] = useState(false);
   return (
     <div className="tool-card">
-      <div className="tool-head">
+      <button
+        type="button"
+        className="tool-head"
+        onClick={() => setOpen((o) => !o)}
+        aria-expanded={open}
+      >
         <span
           className={
             'tool-dot ' + (item.done ? (item.ok ? 'is-ok' : 'is-err') : 'is-running')
@@ -23,7 +29,18 @@ function ToolCard({ item }: { item: ToolItem }) {
         <span className="tool-dur">
           {item.done ? `${item.durationMs} ms` : 'running…'}
         </span>
-      </div>
+        <span className={'tool-chevron' + (open ? ' is-open' : '')}>›</span>
+      </button>
+      {open && (
+        <div className="tool-body">
+          <div className="tool-section">input</div>
+          <pre>{JSON.stringify(item.input, null, 2)}</pre>
+          <div className="tool-section">
+            {item.done ? `output — ${item.ok ? 'ok' : 'error'}` : 'output — pending'}
+          </div>
+          {item.output !== null && <pre>{item.output}</pre>}
+        </div>
+      )}
     </div>
   );
 }

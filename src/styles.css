@@ -154,6 +154,49 @@ body {
   gap: 8px;
   padding: 7px 10px;
   min-width: 0;
+  width: 100%;
+  font: inherit;
+  text-align: left;
+  color: inherit;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.tool-chevron {
+  flex: none;
+  color: var(--dim);
+  transition: transform 0.15s ease;
+  transform: rotate(0deg);
+}
+
+.tool-chevron.is-open {
+  transform: rotate(90deg);
+}
+
+.tool-body {
+  border-top: 1px solid var(--border);
+  padding: 8px 10px 10px;
+}
+
+.tool-section {
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--dim);
+  margin: 6px 0 4px;
+}
+
+.tool-body pre {
+  margin: 0;
+  padding: 8px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  overflow-x: auto;
+  font-family: var(--mono);
+  font-size: 12px;
+  line-height: 1.5;
 }
 
 .tool-dot {
