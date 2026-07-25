@@ -246,3 +246,33 @@ body {
   min-width: 74px;
   font-weight: 600;
 }
+
+.speed-group {
+  display: flex;
+}
+
+.btn-speed {
+  border-radius: 0;
+  padding: 5px 9px;
+  font-variant-numeric: tabular-nums;
+  color: var(--dim);
+}
+
+.btn-speed:first-child {
+  border-radius: 5px 0 0 5px;
+}
+
+.btn-speed:last-child {
+  border-radius: 0 5px 5px 0;
+}
+
+.btn-speed + .btn-speed {
+  margin-left: -1px;
+}
+
+.btn-speed.is-active {
+  color: var(--bg);
+  background: var(--accent);
+  border-color: var(--accent);
+  position: relative;
+}

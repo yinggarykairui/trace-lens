@@ -8,6 +8,8 @@ import { Timeline } from './Timeline';
 
 const trace = rawTrace as unknown as Trace;
 
+const SPEEDS = [0.5, 1, 2, 4];
+
 export default function App() {
   const playback = usePlayback(trace.meta.duration_ms, true);
   const { toggle } = playback;
@@ -35,6 +37,18 @@ export default function App() {
         <button type="button" className="btn btn-play" onClick={toggle}>
           {playback.playing ? 'Pause' : 'Play'}
         </button>
+        <div className="speed-group" role="group" aria-label="playback speed">
+          {SPEEDS.map((s) => (
+            <button
+              type="button"
+              key={s}
+              className={'btn btn-speed' + (playback.speed === s ? ' is-active' : '')}
+              onClick={() => playback.setSpeed(s)}
+            >
+              {s}×
+            </button>
+          ))}
+        </div>
       </div>
     </div>
   );
