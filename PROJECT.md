@@ -60,27 +60,54 @@ Increment 1 (day 002) — complete, shipped, must-pass 7/7:
 - [x] 375 px pass (no h-scroll, touch scrub works)
 - [x] README + LICENSE + screenshot · Pages live (critic report in #26)
 
-Increment 2 (day 005):
-- [ ] D2: opened card returns expanded after scrub-back past its birth;
+Increment 2 (day 005) — complete, shipped:
+- [x] D2: opened card returns expanded after scrub-back past its birth;
       survives restart; page reload resets
-- [ ] D3: muted hint in the empty pane when paused before the first event;
+- [x] D3: muted hint in the empty pane when paused before the first event;
       gone at the first projected item
-- [ ] #t=12.4 load → paused there, pane + playhead projected to the moment
-- [ ] Hash garbage (#t=junk / -3 / 9999) never breaks load: junk → normal
+- [x] #t=12.4 load → paused there, pane + playhead projected to the moment
+- [x] Hash garbage (#t=junk / -3 / 9999) never breaks load: junk → normal
       autoplay; finite → clamped, paused
-- [ ] Pause/scrub rewrites #t (debounced replaceState); copied URL
+- [x] Pause/scrub rewrites #t (debounced replaceState); copied URL
       reproduces the moment; Back gains no entries
-- [ ] Regression: projectState-only render path; play/space/speeds/restart/
+- [x] Regression: projectState-only render path; play/space/speeds/restart/
       drag-scrub/375 px unbroken; `npm run build` clean
-- [ ] README sentences (card persistence, deep-link, #t run note) true ·
+- [x] README sentences (card persistence, deep-link, #t run note) true ·
       increment sign-off + dashboard row
+
+Two things the increment 2 critics forced that were not in the spec, both
+kept: Play now restarts from anywhere in the run's **silent tail** (the
+1.05 s after the last event at 46.664 s, derived from the trace by
+`lastContentMs` in App.tsx, not a constant) — without it, a scrub to the
+last few pixels wrote a `#t=` link whose first Play click did nothing
+visible. And the clock's own stop at the end no longer writes the hash, so
+watching the demo through and reloading replays it instead of handing back
+a spent transcript.
 
 Anything beyond increment 2 is a NEW increment needing a spec.
 
 ## Open threads
 
-- Likeliest next fence moves (an owner issue would open one): second
-  bundled trace (contrast run) · reduced-motion mode · live hashchange
-  handling (jump when the hash of an open tab is edited).
+- Likeliest next fence moves (an owner issue would open one), best first:
+  **live hashchange handling** — a `#t=` link clicked into an already-open
+  tab does nothing and the address bar then disagrees with the app; both
+  increment-2 critics named it the one path where a share link fails a real
+  recipient, so it is the fence item to open next. Then: second bundled
+  trace (contrast run) · reduced-motion mode.
 - Deliberate: the hash mirrors the last paused/scrubbed moment, not the
   live playhead (no per-frame replaceState). Revisit only if it confuses.
+- Deliberate: the hash carries tenths of a second, floored to match the
+  on-screen readout, so a reopened link can sit up to 99 ms behind the
+  sharer's playhead. Invisible in practice.
+- Kept nits from increment 2's critics — judged not worth a cycle, recorded
+  so the next revisit can price them: the `<h1>` wraps to two lines at
+  ≤375 px (pre-existing since increment 1, one CSS line) · the empty-pane
+  hint is one line orphaned at the top of a tall pane — copy and tone are
+  right, placement is not · `dependencies` use caret ranges rather than
+  pins (§13), mitigated by the committed lockfile and the prebuilt `docs/`
+  · `parseHashTime` accepts anything `Number()` accepts, so `#t=0x10`
+  seeks to 16 s — harmless, nothing crashes.
+- Latent, cannot occur with the committed fixture: `lastContentMs` seeds
+  its reduce at 0, so a trace with no events would make the whole run a
+  silent tail and Play would always replay. Guard it if the fixture ever
+  becomes loadable input.
