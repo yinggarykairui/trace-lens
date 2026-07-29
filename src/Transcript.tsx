@@ -45,7 +45,7 @@ function ToolCard({ item }: { item: ToolItem }) {
   );
 }
 
-export function Transcript({ items }: { items: Item[] }) {
+export function Transcript({ items, playing }: { items: Item[]; playing: boolean }) {
   const paneRef = useRef<HTMLDivElement>(null);
   const pinnedRef = useRef(true); // stick to the bottom until the user scrolls up
 
@@ -62,6 +62,11 @@ export function Transcript({ items }: { items: Item[] }) {
 
   return (
     <div className="transcript" ref={paneRef} onScroll={onScroll}>
+      {/* nothing has happened yet at this playhead, and no clock is running to
+          change that — say which control moves it, rather than sit blank */}
+      {items.length === 0 && !playing && (
+        <p className="pane-hint">Press play (or space), or scrub the timeline.</p>
+      )}
       {items.map((item) => {
         switch (item.kind) {
           case 'turn':
