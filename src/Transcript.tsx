@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import type { Item, ToolItem } from './project';
 
 function summarizeInput(input: Record<string, unknown>): string {
@@ -9,14 +9,21 @@ function summarizeInput(input: Record<string, unknown>): string {
   return parts.join('  ');
 }
 
-function ToolCard({ item }: { item: ToolItem }) {
-  const [open, setOpen] = useState(false);
+function ToolCard({
+  item,
+  open,
+  onToggle,
+}: {
+  item: ToolItem;
+  open: boolean;
+  onToggle: (callId: string) => void;
+}) {
   return (
     <div className="tool-card">
       <button
         type="button"
         className="tool-head"
-        onClick={() => setOpen((o) => !o)}
+        onClick={() => onToggle(item.callId)}
         aria-expanded={open}
       >
         <span
@@ -48,6 +55,20 @@ function ToolCard({ item }: { item: ToolItem }) {
 export function Transcript({ items, playing }: { items: Item[]; playing: boolean }) {
   const paneRef = useRef<HTMLDivElement>(null);
   const pinnedRef = useRef(true); // stick to the bottom until the user scrolls up
+
+  // Which cards are expanded, keyed by call_id and held here rather than inside
+  // ToolCard: a card unmounts whenever the playhead moves back before its birth,
+  // and losing the expansion on the way back would be a surprise (D2). The
+  // projection stays pure — this is view state, not projected state. Transcript
+  // never unmounts, so the set also survives restart; a reload resets it.
+  const [openCalls, setOpenCalls] = useState<ReadonlySet<string>>(() => new Set());
+  const toggleCall = useCallback((callId: string) => {
+    setOpenCalls((prev) => {
+      const next = new Set(prev);
+      if (!next.delete(callId)) next.add(callId);
+      return next;
+    });
+  }, []);
 
   const onScroll = () => {
     const el = paneRef.current;
@@ -84,7 +105,14 @@ export function Transcript({ items, playing }: { items: Item[]; playing: boolean
               </div>
             );
           case 'tool':
-            return <ToolCard item={item} key={item.id} />;
+            return (
+              <ToolCard
+                item={item}
+                key={item.id}
+                open={openCalls.has(item.callId)}
+                onToggle={toggleCall}
+              />
+            );
           case 'stats':
             return (
               <div className="turn-stats" key={item.id}>
