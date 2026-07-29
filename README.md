@@ -20,7 +20,9 @@ Open the [live demo](https://yinggarykairui.github.io/trace-lens/), or locally:
     npm run dev        # dev server
     npm run build      # builds to docs/ (served by GitHub Pages)
 
-Space bar toggles play/pause. Adding `#t=<seconds>` to the URL — `#t=12.4`, or whatever the address bar picked up when you last paused — opens the replay paused at that second; anything else in the hash is ignored and the replay just starts from the top.
+Space bar toggles play/pause.
+
+Add `#t=<seconds>` to the URL to open the replay paused at that second — `#t=12.4`, or whatever the address bar picked up when you last paused. Values outside the run are clamped to its start or end. A hash with no usable `t` in it is ignored, and the replay starts from the top as usual.
 
 ## Why it exists
 
