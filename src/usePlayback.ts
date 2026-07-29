@@ -15,12 +15,19 @@ export interface Playback {
  * real elapsed time x speed into vt. Seeking just moves vt; the same loop
  * continues from the new position. Auto-pauses at the end of the run.
  */
-export function usePlayback(durationMs: number, autoplay = false): Playback {
-  const [vt, setVt] = useState(0);
+export function usePlayback(
+  durationMs: number,
+  autoplay = false,
+  initialVt = 0,
+): Playback {
+  // autoplay/initialVt are read once, at mount: a deep-linked load starts the
+  // clock somewhere other than 0, and paused. Later changes are ignored.
+  const start = Math.max(0, Math.min(durationMs, initialVt));
+  const [vt, setVt] = useState(start);
   const [playing, setPlaying] = useState(autoplay);
   const [speed, setSpeedState] = useState(1);
 
-  const vtRef = useRef(0);
+  const vtRef = useRef(start);
   const speedRef = useRef(1);
   const playingRef = useRef(autoplay);
 
