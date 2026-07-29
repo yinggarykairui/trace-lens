@@ -31,9 +31,14 @@ export function parseHashTime(rawHash: string): number | null {
   return null;
 }
 
-/** Format ms as the hash's own units: seconds, one decimal. */
+/**
+ * Format ms as the hash's own units: seconds, one decimal — floored, never
+ * rounded. Rounding up would disagree with the on-screen readout (which floors
+ * to whole seconds) and could push the value past the end of the run, so the
+ * link would land a hair short of a moment the sharer saw as the end.
+ */
 export function formatHashTime(ms: number): string {
-  return `#t=${(ms / 1000).toFixed(1)}`;
+  return `#t=${(Math.floor(ms / 100) / 10).toFixed(1)}`;
 }
 
 /**

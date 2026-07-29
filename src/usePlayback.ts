@@ -1,5 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
+/**
+ * How close to the end of the run counts as "at the end". Below one tenth of a
+ * second nothing more can be seen, and that is also the hash's resolution.
+ */
+export const END_SLACK_MS = 100;
+
 export interface Playback {
   vt: number; // virtual time, ms from run start
   playing: boolean;
@@ -52,8 +58,11 @@ export function usePlayback(
   }, [playing, durationMs]);
 
   const toggle = useCallback(() => {
-    if (!playingRef.current && vtRef.current >= durationMs) {
-      // play pressed at the end: start over
+    if (!playingRef.current && vtRef.current >= durationMs - END_SLACK_MS) {
+      // play pressed at the end: start over. The slack matters — a deep-link or
+      // a scrub can park the playhead a few ms short of the true end (the hash
+      // carries tenths of a second), and playing from there would advance one
+      // frame and auto-pause again, so Play would look dead.
       vtRef.current = 0;
       setVt(0);
     }

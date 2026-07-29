@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef } from 'react';
 import rawTrace from './trace.json';
 import type { Trace } from './types';
 import { projectState } from './project';
-import { usePlayback } from './usePlayback';
+import { END_SLACK_MS, usePlayback } from './usePlayback';
 import { parseHashTime, useHashPublisher } from './hash';
 import { Transcript } from './Transcript';
 import { Timeline } from './Timeline';
@@ -42,14 +42,18 @@ export default function App() {
 
   // Pausing fixes a moment worth sharing; playing does not (a per-frame hash
   // would be a live mirror, not a link). Skips the initial render: the hash
-  // that was loaded is left exactly as the visitor received it.
+  // that was loaded is left exactly as the visitor received it. Also skips the
+  // clock's own stop at the end of the run — nobody chose that moment, and a
+  // visitor who just watched the whole thing should be able to reload and watch
+  // it again rather than find a finished transcript in the address bar.
   const vtRef = useRef(vt);
   vtRef.current = vt; // read by the pause effect, which must not run per frame
   const wasPlaying = useRef(playing);
   useEffect(() => {
     const stopped = wasPlaying.current && !playing;
     wasPlaying.current = playing;
-    if (stopped) publishHash(vtRef.current);
+    const ranOut = vtRef.current >= trace.meta.duration_ms - END_SLACK_MS;
+    if (stopped && !ranOut) publishHash(vtRef.current);
   }, [playing, publishHash]);
 
   useEffect(() => {
