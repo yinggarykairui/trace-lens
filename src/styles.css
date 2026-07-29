@@ -76,6 +76,12 @@ body {
   line-height: 1.65;
 }
 
+.pane-hint {
+  margin: 4px 0;
+  color: var(--dim);
+  font-style: italic;
+}
+
 .turn-divider {
   display: flex;
   align-items: center;

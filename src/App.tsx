@@ -36,7 +36,7 @@ export default function App() {
         <h1>trace-lens</h1>
         <span className="trace-title">{trace.meta.title}</span>
       </header>
-      <Transcript items={items} />
+      <Transcript items={items} playing={playback.playing} />
       <Timeline trace={trace} vt={playback.vt} onSeek={playback.seek} />
       <div className="controls">
         <button type="button" className="btn btn-play" onClick={toggle}>
