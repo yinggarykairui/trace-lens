@@ -25,6 +25,7 @@ export function usePlayback(
   durationMs: number,
   autoplay = false,
   initialVt = 0,
+  endSlackMs = END_SLACK_MS,
 ): Playback {
   // autoplay/initialVt are read once, at mount: a deep-linked load starts the
   // clock somewhere other than 0, and paused. Later changes are ignored.
@@ -58,17 +59,17 @@ export function usePlayback(
   }, [playing, durationMs]);
 
   const toggle = useCallback(() => {
-    if (!playingRef.current && vtRef.current >= durationMs - END_SLACK_MS) {
+    if (!playingRef.current && vtRef.current >= durationMs - endSlackMs) {
       // play pressed at the end: start over. The slack matters — a deep-link or
-      // a scrub can park the playhead a few ms short of the true end (the hash
-      // carries tenths of a second), and playing from there would advance one
-      // frame and auto-pause again, so Play would look dead.
+      // a scrub can park the playhead inside the run's silent tail, and playing
+      // from there would run the clock out with nothing new appearing, so Play
+      // would look dead. The caller sizes the tail; see App.tsx.
       vtRef.current = 0;
       setVt(0);
     }
     playingRef.current = !playingRef.current;
     setPlaying(playingRef.current);
-  }, [durationMs]);
+  }, [durationMs, endSlackMs]);
 
   const seek = useCallback(
     (target: number) => {
