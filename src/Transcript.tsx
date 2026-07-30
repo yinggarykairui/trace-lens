@@ -16,14 +16,15 @@ function ToolCard({
 }: {
   item: ToolItem;
   open: boolean;
-  onToggle: (callId: string) => void;
+  onToggle: (callId: string, card: HTMLElement | null) => void;
 }) {
+  const cardRef = useRef<HTMLDivElement>(null);
   return (
-    <div className="tool-card">
+    <div className="tool-card" ref={cardRef}>
       <button
         type="button"
         className="tool-head"
-        onClick={() => onToggle(item.callId)}
+        onClick={() => onToggle(item.callId, cardRef.current)}
         aria-expanded={open}
       >
         <span
@@ -62,13 +63,26 @@ export function Transcript({ items, playing }: { items: Item[]; playing: boolean
   // projection stays pure — this is view state, not projected state. Transcript
   // never unmounts, so the set also survives restart; a reload resets it.
   const [openCalls, setOpenCalls] = useState<ReadonlySet<string>>(() => new Set());
-  const toggleCall = useCallback((callId: string) => {
+  const toggledCard = useRef<HTMLElement | null>(null);
+  const toggleCall = useCallback((callId: string, card: HTMLElement | null) => {
+    toggledCard.current = card;
     setOpenCalls((prev) => {
       const next = new Set(prev);
       if (!next.delete(callId)) next.add(callId);
       return next;
     });
   }, []);
+
+  // An opened body is often taller than what is left below the card, so without
+  // this most of what the reader just asked for renders off the bottom of the
+  // pane with nothing (overlay scrollbars) to say so. The autoscroll effect
+  // below cannot cover it: a toggle does not change `items`. 'nearest' scrolls
+  // the minimum, so a card already fully visible does not move.
+  useEffect(() => {
+    const card = toggledCard.current;
+    toggledCard.current = null;
+    if (card) card.scrollIntoView({ block: 'nearest' });
+  }, [openCalls]);
 
   const onScroll = () => {
     const el = paneRef.current;
@@ -81,13 +95,19 @@ export function Transcript({ items, playing }: { items: Item[]; playing: boolean
     if (el && pinnedRef.current) el.scrollTop = el.scrollHeight;
   }, [items]);
 
+  // Nothing has happened yet at this playhead, and no clock is running to change
+  // that — say which control moves it, rather than sit blank. (When this is the
+  // only thing in the pane, the pane centres it: see .transcript.is-empty. The
+  // *condition* stays exactly as is — during autoplay "press play" would lie.)
+  const showHint = items.length === 0 && !playing;
+
   return (
-    <div className="transcript" ref={paneRef} onScroll={onScroll}>
-      {/* nothing has happened yet at this playhead, and no clock is running to
-          change that — say which control moves it, rather than sit blank */}
-      {items.length === 0 && !playing && (
-        <p className="pane-hint">Press play (or space), or scrub the timeline.</p>
-      )}
+    <div
+      className={'transcript' + (showHint ? ' is-empty' : '')}
+      ref={paneRef}
+      onScroll={onScroll}
+    >
+      {showHint && <p className="pane-hint">Press play (or space), or scrub the timeline.</p>}
       {items.map((item) => {
         switch (item.kind) {
           case 'turn':
