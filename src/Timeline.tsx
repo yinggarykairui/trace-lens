@@ -115,6 +115,18 @@ export function Timeline({
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
+    // ResizeObserver is Chrome 64+ / Safari 13.1+ / Firefox 69+ — old, but the
+    // same rule as roundRect in draw() applies: there is no error boundary above
+    // this effect, so a browser without it would throw here and unmount the
+    // whole tree. Fall back to the window's resize event; clientWidth is the
+    // same content box contentRect reports (no padding, border-box sizing), so
+    // both paths hand draw() the pixels seekFromPointer maps back.
+    if (typeof ResizeObserver !== 'function') {
+      const measure = () => setWidth(canvas.clientWidth);
+      measure();
+      window.addEventListener('resize', measure);
+      return () => window.removeEventListener('resize', measure);
+    }
     const ro = new ResizeObserver((entries) => {
       const entry = entries[0];
       if (entry) setWidth(entry.contentRect.width);
