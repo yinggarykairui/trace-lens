@@ -405,6 +405,12 @@ body {
     min-width: 62px;
   }
 
+  .tool-head {
+    /* the other thing a thumb lands on, and it was 35px tall — same 44px goal
+       as .btn above. Only the head grows; the body below it is unaffected. */
+    min-height: 44px;
+  }
+
   .tool-body pre {
     /* an inner horizontal scroll hid the payload's tail on a phone, and the
        tail is the point of this trace (`size - 1` becoming `size`) */
