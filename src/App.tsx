@@ -105,6 +105,16 @@ export default function App() {
       <header className="header">
         <h1>trace-lens</h1>
         <span className="trace-title">{trace.meta.title}</span>
+        {/* A `#t=` link drops a stranger straight in here with nothing to say
+            what this is. Provenance only — one anchor, not share UI. */}
+        <a
+          className="source-link"
+          href="https://github.com/yinggarykairui/trace-lens"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          source
+        </a>
       </header>
       <Transcript items={items} playing={playback.playing} />
       <Timeline trace={trace} vt={playback.vt} onSeek={onSeek} />
