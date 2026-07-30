@@ -84,6 +84,84 @@ visible. And the clock's own stop at the end no longer writes the hash, so
 watching the demo through and reloading replays it instead of handing back
 a spent transcript.
 
+Evening polish pass (day 005, the 20:00 PT shift — MANUAL §11 evening
+mandate). Three critic→fix cycles on the already-shipped increment under
+feature freeze: no new scope, no fence item moved, 14 commits. What
+fresh-eyes critics found and what closed:
+
+- [x] **Blocker.** `parseHashTime`'s `decodeURIComponent` was unguarded, so
+      `#t=%` (also `5%`, `%zz`, `%FF`, `%E0%A4%A`) threw `URIError` during
+      module evaluation — before React mounted — leaving a **permanently
+      blank page**, no UI at all. A stray `%` in a shared link is exactly
+      the garbage that parser exists to absorb. Now try/catch → the
+      existing junk path (normal autoplay).
+- [x] Virtual time could go negative: the rAF accumulator clamped only
+      upward, and `last` (a `performance.now()` captured in the play
+      effect) can postdate the frame's own timestamp, so a play toggle
+      could apply a negative delta — rendering `-1:-1 / 0:47` and
+      publishing `#t=-0.1`. The share link this increment exists to
+      produce came out corrupt. Clamped at both ends in all three vt
+      writers, plus a `fmt` floor.
+- [x] Stale hashes, three paths: Play-at-the-end and Restart both replayed
+      from 0 while leaving the old `#t=` in the address bar, and the run
+      reaching its own end could not clear a hash an earlier pause had
+      published. Each one handed a spent transcript to whoever reopened the
+      link. All three now republish or clear (`clear()` cancels the pending
+      debounced write first, so nothing lands after it).
+- [x] Timeline draw and seek used different widths (`contentRect` 818 vs
+      `getBoundingClientRect` 820), so clicking the very pixel the playhead
+      was drawn on seeked ~59 ms off at desktop width and ~170 ms at
+      320 px — past the hash's own 100 ms resolution. One width now, border
+      inset corrected: measured error ≤7 ms.
+- [x] `ctx.roundRect` and `new ResizeObserver` were unguarded inside draw
+      effects. With no error boundary above them React 19 unmounts on
+      throw — the same blank page as the blocker, for older browsers.
+      Feature-detected, with `fillRect` and window-resize fallbacks.
+- [x] README truth (directive 4): "**recorded** LLM agent run" and "**real
+      timings**" implied a captured session, but `trace.json` is a
+      hand-authored fixture → "sample trace". The provenance footer was
+      frozen at Day 002 → `Day 002 (revisited day 005)`. Two 40-word
+      sentences split, then the section merged back inside STYLE.md's 2–5
+      sentence slot.
+- [x] UX pass on what already existed: tool cards had no hover state at all
+      (a stranger could watch the whole run and never learn they open —
+      never seeing this increment's headline feature), opening one left
+      181 px of it clipped below the pane at 375 px, the `<h1>` wrapped
+      mid-word as "trace-"/"lens" on a phone, the empty-pane hint sat
+      orphaned ~980 px above the button it names, phone `<pre>` payloads
+      hid the trace's punchline behind an inner scroll, tap targets were
+      34 px, and the timeline lane was drawn at 1.08:1 against the page —
+      effectively undrawn. All closed. No legend, no new UI.
+- [x] Page metadata: description, inline `data:` SVG favicon (no more
+      `/favicon.ico` 404), `og:type/title/description`, so a pasted `#t=`
+      link unfurls as something. Plus one `source` anchor in the header:
+      the fence's "the address bar is the share UI" theory makes the README
+      the only documentation of `#t=`, and a deep link dropped a stranger
+      into the demo with no route to it. Provenance, not share UI.
+- [x] §13: `react`, `react-dom` and all five devDependencies pinned exact.
+      No resolved version moved — the rebuilt bundle is byte-identical.
+- [x] **A regression the polish itself introduced, caught by cycle 3 and
+      fixed in cycle 3.** The new card scroll-into-view fired on close as
+      well as open; its own programmatic scroll emitted a `scroll` event,
+      `onScroll` latched `pinnedRef` false, and the streaming autoscroll
+      then never re-snapped — so one tap on a card permanently killed
+      pinned-to-bottom and the last ~12 s of the run streamed off-screen.
+      Self-scrolls are now flagged and ignored by `onScroll`, and the
+      toggle scrolls on open only. Verified 12/12 across 0.5–4× replay and
+      4/6/10× CPU throttle, with the same probe failing 4/4 on the pre-fix
+      build. A deliberate scroll-up still unpins; returning re-pins.
+- [x] `screenshot.png` re-captured from the polished build (§9.6), framing
+      matched to the existing caption; lane pixels sampled to confirm
+      `#2a2f39`.
+
+Kept deliberately after three cycles: `#t=0x10` seeks to 16 s because
+`parseHashTime` is `Number()`-lenient (harmless, nothing crashes) · the
+~0.5 s blank pane at the very start of autoplay (showing the hint there
+would make its own "Press play" copy false) · the desktop vertical dead
+space at 1440×900 (a layout restructure is not a polish-cycle change) ·
+`.tool-body pre` still scrolling horizontally at ≥481 px, where there is
+room for it.
+
 Anything beyond increment 2 is a NEW increment needing a spec.
 
 ## Open threads
@@ -99,15 +177,24 @@ Anything beyond increment 2 is a NEW increment needing a spec.
 - Deliberate: the hash carries tenths of a second, floored to match the
   on-screen readout, so a reopened link can sit up to 99 ms behind the
   sharer's playhead. Invisible in practice.
-- Kept nits from increment 2's critics — judged not worth a cycle, recorded
-  so the next revisit can price them: the `<h1>` wraps to two lines at
-  ≤375 px (pre-existing since increment 1, one CSS line) · the empty-pane
-  hint is one line orphaned at the top of a tall pane — copy and tone are
-  right, placement is not · `dependencies` use caret ranges rather than
-  pins (§13), mitigated by the committed lockfile and the prebuilt `docs/`
-  · `parseHashTime` accepts anything `Number()` accepts, so `#t=0x10`
-  seeks to 16 s — harmless, nothing crashes.
-- Latent, cannot occur with the committed fixture: `lastContentMs` seeds
-  its reduce at 0, so a trace with no events would make the whole run a
-  silent tail and Play would always replay. Guard it if the fixture ever
-  becomes loadable input.
+- Increment 2's four kept nits are **closed** by the day-005 evening polish
+  pass (above): the `<h1>` wrap, the orphaned hint, the caret ranges, and
+  the latent no-events `lastContentMs` seed. Only `#t=0x10`'s parsing
+  leniency is still deliberately kept.
+- Open, priced, not worth a cycle tonight: the desktop layout leaves
+  ~700 px of dead space at 1440×900 at load and a 139 px gap above the
+  timeline mid-run, because content is top-aligned — the honest fix is
+  bottom-anchoring the transcript so it fills upward like a console, which
+  is a layout change and wants its own increment · the canvas is
+  unfocusable (`tabIndex`/`role` unset) so keyboard users cannot seek at
+  all, while the empty-pane hint invites them to "scrub the timeline" —
+  adding arrow-key seeking is a feature, so it needs a spec, but the copy
+  and the capability should agree · the timeline's three tool colours have
+  no legend, so the bars read as unlabelled debris to a first-time viewer.
+- Verification debt, not a code defect: no scheduled shift has ever loaded
+  `https://yinggarykairui.github.io/trace-lens/`. The sandboxes those
+  shifts run in cannot reach `github.io` at all, so §11.2's live-demo line
+  and the repo description/topics check keep falling to desk sessions. What
+  *is* verified, three times independently: the committed `docs/` is
+  byte-identical to a fresh `npm run build` from `git archive HEAD`, so the
+  deploy serves what the source says.
