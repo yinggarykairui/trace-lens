@@ -10,9 +10,9 @@ Replay a sample LLM agent run as if it were happening live — token-by-token te
 
 ## What it does
 
-trace-lens replays a bundled JSON trace of a coding agent fixing an off-by-one pagination bug — three turns, five tool calls, realistic timings. Text streams delta-by-delta on the trace's own rhythm, and tool calls appear as cards that expand to show full input and output. A card you opened stays open even if you scrub back past the moment it happened and return. A Canvas 2D timeline lane draws the whole run — text ticks, tool-call duration bars, turn boundaries. Clicking or dragging it seeks the replay to that exact moment, even mid-word. Play, pause, restart, and 0.5×–4× speed controls drive one shared clock, so the transcript and timeline can never disagree. The trace is compiled into the bundle: no keys, no network requests, nothing live.
+trace-lens replays a bundled JSON trace of a coding agent fixing an off-by-one pagination bug — three turns, five tool calls, no keys, no network requests. Text streams delta-by-delta on the trace's own rhythm; tool-call cards expand to full input and output, and stay open across a scrub back past them. A Canvas 2D timeline draws the whole run — text ticks, tool-call bars, turn boundaries — and clicking or dragging it seeks the replay to that moment, even mid-word. Play, pause, restart, and 0.5×–4× speed controls drive one shared clock, so the transcript and timeline can never disagree.
 
-Pause or scrub and the moment goes into the URL as `#t=<seconds>`: the address bar is the share link, and whoever opens it lands paused at that point in the run.
+Pause or scrub and the moment goes into the URL as `#t=<seconds>`, so the address bar is the share link.
 
 ## How to run
 
