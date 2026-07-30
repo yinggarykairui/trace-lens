@@ -11,6 +11,11 @@ const TOOL_COLORS: Record<string, string> = {
 };
 const TOOL_FALLBACK = '#7f8ea3';
 
+// The lane's own surface. Kept a clear step above the page background so the
+// track's extent is visible even before anything is drawn into it; the bars and
+// the playhead carry their own contrast.
+const LANE_FILL = '#2a2f39';
+
 function draw(canvas: HTMLCanvasElement, trace: Trace, vt: number, width: number) {
   const dpr = Math.min(2, window.devicePixelRatio || 1);
   const w = Math.max(1, Math.round(width * dpr));
@@ -28,7 +33,7 @@ function draw(canvas: HTMLCanvasElement, trace: Trace, vt: number, width: number
   const x = (t: number) => PAD + (t / duration) * span;
 
   // lane background
-  ctx.fillStyle = '#171a20';
+  ctx.fillStyle = LANE_FILL;
   ctx.fillRect(0, 0, width, HEIGHT);
 
   // turn dividers
@@ -62,9 +67,16 @@ function draw(canvas: HTMLCanvasElement, trace: Trace, vt: number, width: number
     const px = x(ev.t);
     const pw = Math.max(3, x(ev.t + ev.duration_ms) - px);
     ctx.fillStyle = TOOL_COLORS[ev.name] ?? TOOL_FALLBACK;
-    ctx.beginPath();
-    ctx.roundRect(px, 16, pw, 10, 2);
-    ctx.fill();
+    // roundRect is Chrome 99+ / Safari 16.4+ / Firefox 112+. There is no error
+    // boundary above this effect, so an older browser throwing here would
+    // unmount the whole tree; square bars read fine.
+    if (typeof ctx.roundRect === 'function') {
+      ctx.beginPath();
+      ctx.roundRect(px, 16, pw, 10, 2);
+      ctx.fill();
+    } else {
+      ctx.fillRect(px, 16, pw, 10);
+    }
   }
 
   // played region tint
@@ -116,9 +128,15 @@ export function Timeline({
     if (canvas && width > 0) draw(canvas, trace, vt, width);
   }, [trace, vt, width]);
 
+  // Both directions must span the same pixels or the playhead lands where a
+  // click does not: `width` is the content box (what draw() maps the run onto),
+  // while getBoundingClientRect includes the 1 px border on each side. Reuse
+  // `width` and take the border out of the origin.
   const seekFromPointer = (e: React.PointerEvent<HTMLCanvasElement>) => {
+    if (width <= 0) return;
     const rect = e.currentTarget.getBoundingClientRect();
-    const frac = (e.clientX - rect.left - PAD) / Math.max(1, rect.width - PAD * 2);
+    const inset = (rect.width - width) / 2; // border: in the rect, not in contentRect
+    const frac = (e.clientX - rect.left - inset - PAD) / Math.max(1, width - PAD * 2);
     onSeek(Math.max(0, Math.min(1, frac)) * trace.meta.duration_ms);
   };
 

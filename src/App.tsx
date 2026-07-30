@@ -23,17 +23,23 @@ const deepLink = parseHashTime(window.location.hash);
  * pointing into it (a scrub to the last few pixels writes one) would answer the
  * first click with a Play button that flickers and no visible motion.
  */
-const lastContentMs = trace.events.reduce((latest, ev) => {
-  const end =
-    ev.type === 'text' && ev.deltas.length > 0
-      ? ev.t + ev.deltas[ev.deltas.length - 1].dt
-      : ev.t;
-  return Math.max(latest, end);
-}, 0);
+const lastContentMs = trace.events.reduce(
+  (latest, ev) => {
+    const end =
+      ev.type === 'text' && ev.deltas.length > 0
+        ? ev.t + ev.deltas[ev.deltas.length - 1].dt
+        : ev.t;
+    return Math.max(latest, end);
+  },
+  // Seed: with no events at all there is no content, and seeding at 0 would
+  // declare the whole run a silent tail, so Play would only ever replay.
+  trace.events.length > 0 ? 0 : trace.meta.duration_ms,
+);
 const endSlackMs = Math.max(END_SLACK_MS, trace.meta.duration_ms - lastContentMs);
 
 function fmt(ms: number): string {
-  const s = Math.floor(ms / 1000);
+  // Guard the floor divisions: a negative vt would render as "-1:-1".
+  const s = Math.floor(Math.max(0, ms) / 1000);
   return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
 }
 
@@ -58,6 +64,15 @@ export default function App() {
     [seek, publishHash],
   );
 
+  // Play pressed at the end restarts from 0, which moves the shared moment and
+  // so must move the hash too: otherwise a scrub to the far right leaves its
+  // spent `#t=47.7` in the address bar while the run replays from the top, and
+  // reloading or sharing hands back a finished transcript. (The clock's own stop
+  // at the end still writes nothing — see the pause effect below.)
+  const onToggle = useCallback(() => {
+    if (toggle()) publishHash(0);
+  }, [toggle, publishHash]);
+
   // Pausing fixes a moment worth sharing; playing does not (a per-frame hash
   // would be a live mirror, not a link). Skips the initial render: the hash
   // that was loaded is left exactly as the visitor received it. Also skips the
@@ -79,11 +94,11 @@ export default function App() {
     const onKey = (e: KeyboardEvent) => {
       if (e.code !== 'Space') return;
       e.preventDefault(); // no page scroll, no focused-button re-activation
-      if (!e.repeat) toggle();
+      if (!e.repeat) onToggle();
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [toggle]);
+  }, [onToggle]);
 
   return (
     <div className="app">
@@ -94,7 +109,7 @@ export default function App() {
       <Transcript items={items} playing={playback.playing} />
       <Timeline trace={trace} vt={playback.vt} onSeek={onSeek} />
       <div className="controls">
-        <button type="button" className="btn btn-play" onClick={toggle}>
+        <button type="button" className="btn btn-play" onClick={onToggle}>
           {playback.playing ? 'Pause' : 'Play'}
         </button>
         <div className="speed-group" role="group" aria-label="playback speed">

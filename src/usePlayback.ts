@@ -10,7 +10,8 @@ export interface Playback {
   vt: number; // virtual time, ms from run start
   playing: boolean;
   speed: number;
-  toggle: () => void;
+  /** Returns true when the press restarted the run from 0 (play at the end). */
+  toggle: () => boolean;
   seek: (vt: number) => void;
   setSpeed: (s: number) => void;
   restart: () => void;
@@ -43,7 +44,14 @@ export function usePlayback(
     let raf = 0;
     let last = performance.now();
     const frame = (now: number) => {
-      const next = Math.min(durationMs, vtRef.current + (now - last) * speedRef.current);
+      // Clamp both ends. `last` is captured when this effect runs, but a frame
+      // callback's `now` is the frame-start timestamp and can predate it, so a
+      // fast play/pause toggle can hand the first frame a negative delta —
+      // which used to drive vt below zero and write `#t=-0.1`.
+      const next = Math.max(
+        0,
+        Math.min(durationMs, vtRef.current + (now - last) * speedRef.current),
+      );
       last = now;
       vtRef.current = next;
       setVt(next);
@@ -59,6 +67,7 @@ export function usePlayback(
   }, [playing, durationMs]);
 
   const toggle = useCallback(() => {
+    let restarted = false;
     if (!playingRef.current && vtRef.current >= durationMs - endSlackMs) {
       // play pressed at the end: start over. The slack matters — a deep-link or
       // a scrub can park the playhead inside the run's silent tail, and playing
@@ -66,9 +75,11 @@ export function usePlayback(
       // would look dead. The caller sizes the tail; see App.tsx.
       vtRef.current = 0;
       setVt(0);
+      restarted = true; // the caller republishes the hash: see App.tsx
     }
     playingRef.current = !playingRef.current;
     setPlaying(playingRef.current);
+    return restarted;
   }, [durationMs, endSlackMs]);
 
   const seek = useCallback(
