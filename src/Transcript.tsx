@@ -63,9 +63,9 @@ export function Transcript({ items, playing }: { items: Item[]; playing: boolean
   // projection stays pure — this is view state, not projected state. Transcript
   // never unmounts, so the set also survives restart; a reload resets it.
   const [openCalls, setOpenCalls] = useState<ReadonlySet<string>>(() => new Set());
-  const toggledCard = useRef<HTMLElement | null>(null);
+  const toggled = useRef<{ callId: string; card: HTMLElement } | null>(null);
   const toggleCall = useCallback((callId: string, card: HTMLElement | null) => {
-    toggledCard.current = card;
+    toggled.current = card ? { callId, card } : null;
     setOpenCalls((prev) => {
       const next = new Set(prev);
       if (!next.delete(callId)) next.add(callId);
@@ -73,20 +73,43 @@ export function Transcript({ items, playing }: { items: Item[]; playing: boolean
     });
   }, []);
 
+  // A scroll we perform ourselves is not the user scrolling away, and must not
+  // be read as one: the scroll event arrives after we have moved the pane,
+  // onScroll would recompute `pinnedRef` from the new position and latch it
+  // false, and the streaming autoscroll below would then never snap to the
+  // bottom again — one tap on a card killed the pinned-to-bottom follow for the
+  // rest of the run. The flag clears on the next animation frame, which the
+  // spec runs after that frame's scroll events, so the user's own next scroll
+  // is read normally.
+  const selfScrolling = useRef(false);
+  const scrollSelf = (move: () => void) => {
+    selfScrolling.current = true;
+    move();
+    requestAnimationFrame(() => {
+      selfScrolling.current = false;
+    });
+  };
+
   // An opened body is often taller than what is left below the card, so without
   // this most of what the reader just asked for renders off the bottom of the
   // pane with nothing (overlay scrollbars) to say so. The autoscroll effect
   // below cannot cover it: a toggle does not change `items`. 'nearest' scrolls
   // the minimum, so a card already fully visible does not move.
+  //
+  // On open only. Closing reveals nothing that needs bringing into view, and
+  // scrolling to a card that is in the middle of shrinking just jerked the pane
+  // (961 -> 282 at 320 px wide).
   useEffect(() => {
-    const card = toggledCard.current;
-    toggledCard.current = null;
-    if (card) card.scrollIntoView({ block: 'nearest' });
+    const t = toggled.current;
+    toggled.current = null;
+    if (t && openCalls.has(t.callId)) {
+      scrollSelf(() => t.card.scrollIntoView({ block: 'nearest' }));
+    }
   }, [openCalls]);
 
   const onScroll = () => {
     const el = paneRef.current;
-    if (!el) return;
+    if (!el || selfScrolling.current) return;
     pinnedRef.current = el.scrollHeight - el.scrollTop - el.clientHeight < 48;
   };
 
