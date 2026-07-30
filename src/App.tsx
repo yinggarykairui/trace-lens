@@ -50,7 +50,7 @@ export default function App() {
     deepLink ?? 0,
     endSlackMs,
   );
-  const { toggle, seek, playing, vt } = playback;
+  const { toggle, seek, restart, playing, vt } = playback;
   const items = useMemo(() => projectState(trace, playback.vt), [playback.vt]);
 
   // ---- hash out: the address bar mirrors the last fixed moment ----
@@ -72,6 +72,15 @@ export default function App() {
   const onToggle = useCallback(() => {
     if (toggle()) publishHash(0);
   }, [toggle, publishHash]);
+
+  // Restart moves the shared moment to 0 unconditionally, so it republishes the
+  // hash through the same publisher as the Play-at-the-end restart above —
+  // without it, Restart after a scrub to 28.7 s replays from the top while the
+  // address bar still reads `#t=28.7`.
+  const onRestart = useCallback(() => {
+    restart();
+    publishHash(0);
+  }, [restart, publishHash]);
 
   // Pausing fixes a moment worth sharing; playing does not (a per-frame hash
   // would be a live mirror, not a link). Skips the initial render: the hash
@@ -134,7 +143,7 @@ export default function App() {
             </button>
           ))}
         </div>
-        <button type="button" className="btn" onClick={playback.restart}>
+        <button type="button" className="btn" onClick={onRestart}>
           Restart
         </button>
         <span className="time-readout">
