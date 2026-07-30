@@ -17,12 +17,22 @@ const WRITE_DEBOUNCE_MS = 250;
  *
  * Out-of-range values are NOT rejected here; clamping is the seek's job, so
  * `#t=9999` on a 47 s trace lands at the end rather than being ignored.
+ *
+ * This runs at module scope, before React mounts, so it must not throw for any
+ * input at all: a single stray `%` in a pasted link (`#t=5%`, `#t=%E0%A4%A`)
+ * makes decodeURIComponent raise URIError, and an escaped throw here would
+ * leave the page permanently blank instead of just ignoring the junk.
  */
 export function parseHashTime(rawHash: string): number | null {
   const params = rawHash.replace(/^#/, '').split('&');
   for (const part of params) {
     if (!part.startsWith('t=')) continue;
-    const raw = decodeURIComponent(part.slice(2)).trim();
+    let raw: string;
+    try {
+      raw = decodeURIComponent(part.slice(2)).trim();
+    } catch {
+      return null; // malformed percent-escape: junk, same as `#t=nonsense`
+    }
     if (raw === '') return null; // `#t=` alone is junk, and Number('') is 0
     const seconds = Number(raw);
     if (!Number.isFinite(seconds)) return null; // 'junk', 'Infinity', '12.4abc'
