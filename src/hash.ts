@@ -52,10 +52,14 @@ export function formatHashTime(ms: number): string {
 }
 
 /**
- * Returns a debounced publisher: call it with the moment to put in the hash.
- * A drag that fires fifty seeks writes once, at the value of the last one.
+ * Returns the two ways the address bar can be written:
+ * - `publish(ms)`: debounced — a drag that fires fifty seeks writes once, at
+ *   the value of the last one.
+ * - `clear()`: drop the `#t=` again, for the moment nobody chose (the clock
+ *   running out at the end of the run).
+ * Both go through replaceState, so neither costs a history entry.
  */
-export function useHashPublisher(): (ms: number) => void {
+export function useHashPublisher(): { publish: (ms: number) => void; clear: () => void } {
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const pending = useRef(0);
 
@@ -66,7 +70,7 @@ export function useHashPublisher(): (ms: number) => void {
     [],
   );
 
-  return useCallback((ms: number) => {
+  const publish = useCallback((ms: number) => {
     pending.current = ms;
     if (timer.current) clearTimeout(timer.current);
     timer.current = setTimeout(() => {
@@ -76,4 +80,20 @@ export function useHashPublisher(): (ms: number) => void {
       history.replaceState(null, '', formatHashTime(pending.current));
     }, WRITE_DEBOUNCE_MS);
   }, []);
+
+  // Not publishing is not enough on its own: a `#t=` an earlier pause or scrub
+  // already wrote outlives the run it points into, so a reload hands back a
+  // near-spent transcript. Cancel any debounced write first — otherwise the
+  // scrub that led here lands its stale value a moment after the clear.
+  const clear = useCallback(() => {
+    if (timer.current) {
+      clearTimeout(timer.current);
+      timer.current = null;
+    }
+    // Same replaceState (no history entry); path and query survive, only the
+    // fragment goes. Assigning location.hash = '' would leave a bare '#'.
+    history.replaceState(null, '', location.pathname + location.search);
+  }, []);
+
+  return { publish, clear };
 }

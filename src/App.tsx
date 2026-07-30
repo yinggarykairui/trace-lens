@@ -54,7 +54,7 @@ export default function App() {
   const items = useMemo(() => projectState(trace, playback.vt), [playback.vt]);
 
   // ---- hash out: the address bar mirrors the last fixed moment ----
-  const publishHash = useHashPublisher();
+  const { publish: publishHash, clear: clearHash } = useHashPublisher();
 
   const onSeek = useCallback(
     (target: number) => {
@@ -84,20 +84,24 @@ export default function App() {
 
   // Pausing fixes a moment worth sharing; playing does not (a per-frame hash
   // would be a live mirror, not a link). Skips the initial render: the hash
-  // that was loaded is left exactly as the visitor received it. Also skips the
-  // clock's own stop at the end of the run — nobody chose that moment, and a
-  // visitor who just watched the whole thing should be able to reload and watch
-  // it again rather than find a finished transcript in the address bar. That
-  // stop is the only way vt reaches duration_ms exactly, which is the test.
+  // that was loaded is left exactly as the visitor received it. The clock's own
+  // stop at the end of the run is not a chosen moment, so it publishes nothing
+  // — and clears what an earlier pause or scrub published, because a `#t=46.4`
+  // left in the address bar outlives the run it points into: reloading after
+  // watching the demo through would hand back a near-spent transcript instead
+  // of replaying it. That stop is the only way vt reaches duration_ms exactly,
+  // which is the test.
   const vtRef = useRef(vt);
   vtRef.current = vt; // read by the pause effect, which must not run per frame
   const wasPlaying = useRef(playing);
   useEffect(() => {
     const stopped = wasPlaying.current && !playing;
     wasPlaying.current = playing;
+    if (!stopped) return;
     const ranOut = vtRef.current >= trace.meta.duration_ms;
-    if (stopped && !ranOut) publishHash(vtRef.current);
-  }, [playing, publishHash]);
+    if (ranOut) clearHash();
+    else publishHash(vtRef.current);
+  }, [playing, publishHash, clearHash]);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
