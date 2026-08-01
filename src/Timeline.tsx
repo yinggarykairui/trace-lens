@@ -1,8 +1,15 @@
 import { useEffect, useRef, useState } from 'react';
 import type { Trace } from './types';
+import type { SeekTarget } from './usePlayback';
 
 const PAD = 8; // px inside the canvas on each side
 const HEIGHT = 64; // css px
+
+// Keyboard seek steps. One second is the smallest move worth making on a 47 s
+// run; five is a turn's worth. Both are coarser than the hash's own 0.1 s, so
+// every keyed moment is a moment the address bar can carry exactly.
+const KEY_STEP_MS = 1000;
+const KEY_STEP_SHIFT_MS = 5000;
 
 const TOOL_COLORS: Record<string, string> = {
   read_file: '#6d94c9',
@@ -107,7 +114,7 @@ export function Timeline({
 }: {
   trace: Trace;
   vt: number;
-  onSeek: (vt: number) => void;
+  onSeek: (target: SeekTarget) => void;
 }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [width, setWidth] = useState(0);
@@ -152,12 +159,56 @@ export function Timeline({
     onSeek(Math.max(0, Math.min(1, frac)) * trace.meta.duration_ms);
   };
 
+  // The keyboard is a third way to reach the same seek, not a third seek: every
+  // key below ends at the same `onSeek` the pointer handlers call, so it gets
+  // the same clamp and the same debounced publish. Timeline still holds no
+  // clock — the arrows ask for "a second either side of wherever the clock is",
+  // which the clock resolves, because a held arrow can fire thirty times before
+  // React re-renders and thirty reads of the same stale `vt` prop would land
+  // one second from the start instead of thirty. Key repeat is otherwise left
+  // alone: the 250 ms publish debounce coalesces the run into one write.
+  const duration = trace.meta.duration_ms;
+  const onKeyDown = (e: React.KeyboardEvent<HTMLCanvasElement>) => {
+    let target: SeekTarget;
+    switch (e.key) {
+      case 'ArrowLeft': {
+        const step = e.shiftKey ? KEY_STEP_SHIFT_MS : KEY_STEP_MS;
+        target = (at) => at - step;
+        break;
+      }
+      case 'ArrowRight': {
+        const step = e.shiftKey ? KEY_STEP_SHIFT_MS : KEY_STEP_MS;
+        target = (at) => at + step;
+        break;
+      }
+      case 'Home':
+        target = 0;
+        break;
+      case 'End':
+        target = duration;
+        break;
+      default:
+        return; // Space belongs to the window handler, and so does everything else
+    }
+    // Arrows scroll the page by default, which would slide the lane out from
+    // under the very playhead the visitor is aiming.
+    e.preventDefault();
+    onSeek(target);
+  };
+
   return (
     <canvas
       ref={canvasRef}
       className="timeline"
       style={{ height: HEIGHT }}
-      aria-label="run timeline — click or drag to seek"
+      tabIndex={0}
+      role="slider"
+      aria-label="run timeline — click, drag, or seek with arrow keys; hold Shift for five seconds, Home and End for the ends of the run"
+      aria-valuemin={0}
+      aria-valuemax={duration / 1000}
+      aria-valuenow={Number((vt / 1000).toFixed(1))}
+      aria-valuetext={`${(vt / 1000).toFixed(1)} seconds of ${(duration / 1000).toFixed(1)}`}
+      onKeyDown={onKeyDown}
       onPointerDown={(e) => {
         e.currentTarget.setPointerCapture(e.pointerId);
         seekFromPointer(e);

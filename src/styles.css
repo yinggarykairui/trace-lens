@@ -307,6 +307,15 @@ body {
   touch-action: none; /* drag-to-seek on touch without scrolling the page */
 }
 
+/* The lane answers arrow keys now, so it has to look focused when it is. The
+   offset clears the lane's own 1px border — a ring drawn on top of it reads as
+   a thicker border rather than as focus — and an outline sits outside layout,
+   so it cannot widen the page at 375px. */
+.timeline:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
 /* ---- controls ---- */
 
 .controls {
