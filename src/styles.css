@@ -316,6 +316,35 @@ body {
   outline-offset: 2px;
 }
 
+/* A caption for the lane's colours, not a control. It wraps rather than
+   scrolls, because a phone is short of vertical room and shorter of patience
+   for a second scroll axis. Swatch colours come from Timeline's colour table
+   as inline styles — the hexes are not repeated here, so there is one table. */
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 14px;
+  margin: 6px 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: 12px;
+  color: var(--dim);
+}
+
+.legend li {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--mono);
+}
+
+.legend-swatch {
+  flex: none;
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+}
+
 /* ---- controls ---- */
 
 .controls {
