@@ -6,6 +6,17 @@ import { useCallback, useEffect, useRef, useState } from 'react';
  */
 export const END_SLACK_MS = 100;
 
+/**
+ * Where to seek to: a moment in ms, or a function of the moment the clock is
+ * on right now. The relative form exists because React props are a frame
+ * behind: a key repeat can fire thirty arrows before a single re-render, and
+ * thirty handlers all reading the same stale `vt` would seek one second thirty
+ * times over. `vtRef` is current the instant a seek lands, so resolving the
+ * delta here is the only way "one second later" means it every time. Still one
+ * seek, one clamp, one publish — the caller does not gain a second path.
+ */
+export type SeekTarget = number | ((vt: number) => number);
+
 export interface Playback {
   vt: number; // virtual time, ms from run start
   playing: boolean;
@@ -14,7 +25,8 @@ export interface Playback {
   toggle: () => boolean;
   /** Stop the clock where it is. Idempotent, and unlike toggle() never plays. */
   pause: () => void;
-  seek: (vt: number) => void;
+  /** Moves the clock and returns the clamped moment it actually landed on. */
+  seek: (target: SeekTarget) => number;
   setSpeed: (s: number) => void;
   restart: () => void;
 }
@@ -101,11 +113,16 @@ export function usePlayback(
     setPlaying(false);
   }, []);
 
+  // The one clamp. Every seek — pointer, key, hash — comes through here, and
+  // the landed value goes back to the caller so nothing downstream (the hash
+  // publisher, above all) has to clamp a second time and get it slightly wrong.
   const seek = useCallback(
-    (target: number) => {
-      const clamped = Math.max(0, Math.min(durationMs, target));
+    (target: SeekTarget) => {
+      const raw = typeof target === 'function' ? target(vtRef.current) : target;
+      const clamped = Math.max(0, Math.min(durationMs, raw));
       vtRef.current = clamped;
       setVt(clamped);
+      return clamped;
     },
     [durationMs],
   );
