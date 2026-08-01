@@ -39,7 +39,15 @@ export function parseHashTime(rawHash: string): number | null {
     }
     if (raw === '') return null; // `#t=` alone is junk, and Number('') is 0
     const seconds = Number(raw);
-    if (!Number.isFinite(seconds)) return null; // 'junk', 'Infinity', '12.4abc'
+    // NaN is junk — `#t=junk`, `#t=12.4abc`, `#t=NaN` name no moment at all.
+    // ±Infinity is not junk: `#t=1e999` and `#t=Infinity` name a moment outside
+    // the run, which the README promises is clamped to its start or end, and
+    // the seek's own clamp (Math.max(0, Math.min(duration, …))) already returns
+    // duration for +Infinity and 0 for -Infinity. Rejecting them here made the
+    // README's clamp sentence false for exactly the values furthest outside the
+    // run. Still one parser and one set of junk rules; only the line between
+    // "junk" and "out of range" moved to where the README already drew it.
+    if (Number.isNaN(seconds)) return null;
     return seconds * 1000;
   }
   return null;
