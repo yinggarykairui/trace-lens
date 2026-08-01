@@ -47,6 +47,16 @@ function toolsInTrace(trace: Trace): string[] {
 // the playhead carry their own contrast.
 const LANE_FILL = '#2a2f39';
 
+// How far the clock has got, as a surface rather than a tint. The old 7% amber
+// wash measured 1.14:1 against LANE_FILL — progress was legible only from the
+// 1.5 px playhead and the readout. This is 3.16:1 (WCAG's 3:1 floor for
+// meaningful non-text), which needs a real lift in lightness: nothing darker
+// than the lane can reach 3:1 against it, since black itself only reaches 1.56.
+// It stays the lane's own hue so the played region reads as the same track lit,
+// and it is painted *under* the dividers, ticks, bars and playhead, so every
+// mark keeps its exact colour and sits clearly on top of it.
+const PLAYED_FILL = '#737b8d';
+
 function draw(canvas: HTMLCanvasElement, trace: Trace, vt: number, width: number) {
   const dpr = Math.min(2, window.devicePixelRatio || 1);
   const w = Math.max(1, Math.round(width * dpr));
@@ -66,6 +76,10 @@ function draw(canvas: HTMLCanvasElement, trace: Trace, vt: number, width: number
   // lane background
   ctx.fillStyle = LANE_FILL;
   ctx.fillRect(0, 0, width, HEIGHT);
+
+  // played region: the surface everything else is drawn on top of
+  ctx.fillStyle = PLAYED_FILL;
+  ctx.fillRect(PAD, 0, Math.max(0, x(vt) - PAD), HEIGHT);
 
   // turn dividers
   for (const ev of trace.events) {
@@ -109,10 +123,6 @@ function draw(canvas: HTMLCanvasElement, trace: Trace, vt: number, width: number
       ctx.fillRect(px, 16, pw, 10);
     }
   }
-
-  // played region tint
-  ctx.fillStyle = 'rgba(227, 179, 76, 0.07)';
-  ctx.fillRect(PAD, 0, x(vt) - PAD, HEIGHT);
 
   // playhead
   const phx = x(vt);
