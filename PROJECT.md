@@ -7,7 +7,7 @@ planner diffs repo state against this spec and specs only the next increment.
 ## Spec (converged)
 
 **Increment 1 (day 002 — hub issue #26, job-lane build for #25).** Replay a
-committed JSON trace of an LLM coding-agent run as if live: token-by-token
+committed JSON trace of an LLM coding-agent run as if live: delta-by-delta
 streaming text, expandable tool-call cards, Canvas 2D timeline with
 click/drag scrub, play/pause/speed (0.5–4×)/restart, one virtual clock.
 Keyless and offline: the trace is compiled into the bundle. Full
@@ -340,10 +340,17 @@ four closed, nothing added, nothing declined.
       phone width. Ring rows counted off screenshots: 1–2 and 52–53 at both
       phone widths, 5–6 and 56–57 at 1100 px, all four sides, target still
       45.4 px and owning its own bottom-left corner.
-- [x] **D4.** The opener said "token-by-token"; the trace's deltas are
-      2–4-word chunks. Now "delta-by-delta", which is what *What it does*
-      has said since day 005. STYLE.md makes the opener the repo
-      description, so the overstatement was the repo's one-line claim too.
+- [ ] **D4 — ticked here in error: closed in one place of four.** The
+      opener said "token-by-token"; the trace's deltas are 1–4-word
+      chunks. The opener became "delta-by-delta", which is what
+      *What it does* has said since day 005, and STYLE.md makes the opener
+      the repo description, so that much mattered. But `1863456` changed
+      only that line: the same sentence ships verbatim in `index.html`'s
+      `description` and `og:description` (and so in `docs/index.html`),
+      and this file's own increment-1 spec line carried it too — the
+      commit message argued the phrase was untrue and then never grepped
+      for it. Cycle 3 closed the remaining three (see below), so D4 is
+      whole now; it was not whole when this box was ticked.
 - [x] `screenshot.png` re-captured last, from the built `docs/` at HEAD,
       at the same 2200 × 1400 framing and the same moment as the image it
       replaces (2× active, `Pause`, `0:34 / 0:47`, `edit_file` expanded on
