@@ -1,6 +1,6 @@
 # trace-lens
 
-Replay a sample LLM agent run as if it were happening live — token-by-token text, tool-call cards, and a scrubbable timeline.
+Replay a sample LLM agent run as if it were happening live — delta-by-delta text, tool-call cards, and a scrubbable timeline.
 
 ![screenshot](screenshot.png)
 
