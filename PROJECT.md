@@ -233,6 +233,62 @@ New and deliberate, per the spec's §8: a junk `hashchange` leaves the
 address bar disagreeing with the app. We ignore it rather than reset the
 viewer's position or clobber what they typed.
 
+**Improvement cycle 1 (day 008 evening), against the merged defect list
+of the playtester and the three critics.** Feature freeze held: seven
+defects closed, one declined, nothing added. Every measurement below was
+taken against the built `docs/`, driven headlessly.
+
+- [x] **D1, the unanimous blocker.** `screenshot.png` had been stale
+      since day 005 and showed 0 px of legend under a caption that
+      claims one. Re-captured from this build at 2200 × 1400, the same
+      framing as before, and checked by eye against all four claims:
+      2× active with the run playing (`Pause`, `0:34 / 0:47`), the
+      `edit_file` card expanded on its INPUT and OUTPUT, turn 3's line
+      streaming behind the caret, the playhead 72.5% along the lane, and
+      the three-row legend under it. Captured last, so the image is of
+      the shipped build rather than of the one the cycle started with.
+- [x] **D2.** `#t=1e999` and `#t=-1e999` parsed to ±Infinity, failed the
+      `Number.isFinite` gate and were treated as junk, so the app played
+      from 0:00 where the README promises a clamp. Only `NaN` is junk
+      now; the seek's own clamp already resolved ±Infinity. `#t=1e999`
+      and `#t=Infinity` → `0:47` paused, `#t=-1e999` → `0:00`, neither
+      rewritten; the eight junk hashes still leave position, play state
+      and `#root` untouched.
+- [x] **D3.** The played region of the lane measured 1.14:1 against the
+      unplayed track — progress was legible only from the playhead. It
+      is a surface now, not a 7% tint, at **3.163:1** sampled from the
+      canvas (`rgb(115,123,141)` against `rgb(42,47,57)`), painted under
+      the dividers, ticks, bars and playhead so every mark keeps its
+      exact colour: the legend swatches still equal their bar pixels.
+- [x] **D4.** The six controls and the `source` link fell back to
+      Chromium's white ring while the canvas and the cards wore the
+      amber one. One `:focus-visible` rule now: nine focusable stops,
+      all `2px rgb(227, 179, 76)`.
+- [x] **D5.** `aria-pressed` on each speed button, mirroring
+      `.is-active` and following a speed change. Play/Pause deliberately
+      left alone — its accessible name already changes.
+- [x] **D6.** `source` 41.5 × 20.4 → **49.5 × 45.4 px** (padded, then
+      pulled back by equal negative margins, so the header still
+      measures 44.3 px at 375 px and 48.3 px at 1100 px); speed buttons
+      40.7 → **44 × 44 px**. `scrollWidth === clientWidth` at 320 and
+      375 px.
+- [x] **D8.** `.tool-summary` was `display:none` below 481 px, so the
+      two `read_file` cards read identically on a phone. Restored on one
+      ellipsised line, half a point smaller: at 375 px the first shows
+      its path in full and the second truncates inside `paginate.test`.
+      No layout cost — head heights (44 px) and the transcript's
+      `scrollHeight` (1280 / 1177 / 1053 px at 320 / 375 / 480 px) are
+      unchanged to the pixel.
+- [ ] **D7 declined.** The defect made it conditional on staying
+      type-clean and it does not; it is an open thread below.
+- [x] Nothing regressed: a live `#t=31.5` still lands paused and
+      unwritten, the six keys still clamp (`0:05 / 0:10 / 0:09 / 0:00 /
+      0:47 / 0:00`), `window.scrollY` stays 0 through every arrow press,
+      drag-seek still lands on the pixel it was released over, zero
+      console and page errors on every run, `npm run build` clean
+      including `tsc --noEmit`, and the committed `docs/` is
+      byte-identical to a fresh build of `git archive HEAD`.
+
 ## Increment 3 spec (day 008 revisit — planner artifact)
 
 *Posted to `PROJECT.md` (repo) and `HANDOFF.md` (hub) rather than as an issue comment: the GitHub API plane is gated in this sandbox. Size s–m. Last ship: day 005 (increment 2) + the day-005 evening polish pass. §4 shape.*
@@ -431,3 +487,59 @@ Anything beyond increment 3 is a NEW increment needing a spec.
   *is* verified, three times independently: the committed `docs/` is
   byte-identical to a fresh `npm run build` from `git archive HEAD`, so the
   deploy serves what the source says.
+
+### Named by cycle 1 (day 008 evening), recorded rather than built
+
+The merged defect list marked these OPEN THREAD: they are not defects the
+fixer may close under feature freeze, and none of them was built. In the
+defect list's own words:
+
+- **The cold first frame.** On the default autoplay load the transcript pane is
+  0 characters for ~500 ms and still 79% empty at 4 s at 1280×800, and the
+  `.pane-hint` never renders (sampled 180 consecutive rAF frames over 3 000 ms:
+  present in 0 of them) because autoplay advances vt before first paint. So the
+  one affordance in the app is shown only to people who arrived at `#t=0`.
+  Increment 2 deliberately kept this (showing the hint during autoplay would
+  make its own "Press play" copy false). It is now named by three independent
+  passes and should be the next increment's headline, not a polish patch.
+- **A sighted keyboard user never learns the keys exist.** They live in the
+  canvas `aria-label` and the README only. The honest fix is an on-screen
+  caption near the legend — new UI, and the spec freezes the hint copy.
+- **Desktop dead space** — 499 px (62% of the viewport) below the last
+  transcript element at t=1 s, 1280×800. Already priced as its own increment.
+- **The legend names bars the eye cannot find.** On an 818 px canvas: `run_tests`
+  82 px total, `read_file` 6 px (two 3 px slivers), `edit_file` 5 px — the 10 px
+  swatch is wider than the bar it describes. The fix is a minimum bar width in
+  `draw()`, which changes what the timeline claims about durations.
+- **A junk `hashchange` produces no acknowledgement** — deliberate and already
+  disclosed; `aria-live` is excluded by the spec.
+- **Restart from paused starts playing** and writes `#t=0.0`, so a reload after
+  two ordinary clicks lands on the blank paused pane.
+- **Back past the first `#t=` lands on a bare `''` hash**, which has no usable
+  `t` and is therefore ignored, so the address bar and the replay disagree —
+  against the README's "stay in agreement" sentence. Deliberate under the spec's
+  junk rule; worth a sentence in the sign-off.
+- **Expanding all five cards at the end leaves 129 px below the fold**
+  (`scrollTop 1337 + 600` vs `scrollHeight 2066`).
+- **`index.html`'s favicon data URI repeats `#6d94c9` and `#c9995f`** — a third
+  copy of two hexes outside `TOOL_COLORS`, pre-existing since day 005.
+- **`#t=0x10` seeks to 0:16** — `Number()`-lenient parsing, kept since day 005.
+
+Two more, from defects the cycle did not close outright:
+
+- **D7, declined and now open: `aria-valuenow` drops the decimal.**
+  `Timeline.tsx` renders `aria-valuenow={Number((vt/1000).toFixed(1))}`, so a
+  whole second reads `"0"` or `"12"` rather than `"0.0"` / `"12.0"`. The defect
+  made the fix conditional on staying type-clean, and it is not: React types
+  `aria-valuenow` as `number`, and passing the one-decimal string fails
+  `tsc --noEmit` with TS2322 (`Type 'string' is not assignable to type
+  'number'`), which `npm run build` runs first. The numeric value is already
+  correct to one decimal — only the trailing zero is missing, and a numeric
+  attribute carries no trailing zero — and `aria-valuetext` already announces
+  the full `31.5 seconds of 47.7` form. Revisit if a future React type ever
+  widens the attribute.
+- **D8 at 320 px.** The tool-card summary is back at phone width, but at 320 px
+  both `read_file` paths truncate before they diverge, so the two cards still
+  read alike there; at 375 px they do not. Buying the extra room means
+  shrinking the duration or the gaps, which is a layout change rather than a
+  polish patch.
