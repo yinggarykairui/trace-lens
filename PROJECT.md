@@ -289,6 +289,81 @@ taken against the built `docs/`, driven headlessly.
       including `tsc --noEmit`, and the committed `docs/` is
       byte-identical to a fresh build of `git archive HEAD`.
 
+**Improvement cycle 2 (day 008 evening), against the merged list of two
+independent clean-context verifiers.** Both returned BLOCK on the same
+thing: a regression cycle 1 itself introduced. Four defects on the list,
+four closed, nothing added, nothing declined.
+
+- [x] **D1, the unanimous blocker, and a regression of cycle 1's own
+      `69721a7`.** That commit bought the played region 3.16:1 against the
+      unplayed track by making it a full-height lighter surface, and paid
+      for it out of every mark drawn on that surface: inside the played
+      region `read_file` 4.30 → 1.36, `run_tests` 4.44 → 1.40, `edit_file`
+      5.25 → 1.66, playhead 6.92 → 2.19, assistant tick 6.24 → 2.43, user
+      tick 2.50 → 1.21, turn divider 1.39 → 1.07 (visually gone). After a
+      full playthrough the played region is the whole lane, so at that
+      point the legend named colours nothing on screen still showed. The
+      commit message stated only the half that improved.
+      Progress and the marks only compete where they share pixels, so
+      progress moved to a band of its own: a 4 px rail along the lane's
+      bottom edge in the playhead's accent, below the dividers' feet
+      (`HEIGHT - 4`), clear of the text ticks (`HEIGHT - 10`), stopping
+      0.75 px short of the playhead's left edge. Nothing is drawn on top of
+      it and it is drawn on top of nothing. Both sides re-measured from the
+      built canvas at dpr 1 on an 818 px lane: **the cue reads 6.92:1**
+      against the unplayed lane beside it (was 3.16, and 1.14 before that),
+      and **every mark is back on `LANE_FILL`** — 4.30 / 4.44 / 5.25 /
+      6.52 / 6.19 / 2.47 / 1.21 sampled, against 3.84 / 3.98 / 4.68 / 5.71
+      / 5.42 / 2.33 / 1.21 for the same probe on a fresh build of
+      `69721a7^`. No mark is below where it stood before either cycle-1
+      state; five are above. (The three alpha strokes sample under their
+      composited-hex values because a 1 px stroke at a fractional x is
+      antialiased across two columns — the same probe reads the same way on
+      both builds.)
+- [x] **D2.** The caption's "the playhead two-thirds through the run" was
+      false of the committed image, which both verifiers measured at
+      71.8–72.5%. The caption moved, not the capture: the trace only lets
+      the caption's three claims co-occur in 34.5–35.6 s (assistant text
+      streams in six windows, `edit_file` is not born until 31.283 s), i.e.
+      72–75%, so at two-thirds nothing is streaming. Now "three-quarters",
+      and the re-captured image measures 72.4% off the PNG.
+- [x] **D3.** Cycle 1's `bb02f93` gave the `source` link a 49.5 × 45.4 px
+      target by padding a 20 px word, which put its box at `top: -1px` at
+      320 and 375 px (3 px at 1100 px) — so its focus ring, drawn 2 px
+      outside the box, landed at −3 px and the viewport cut its top edge
+      off at every width. Lowering the box inside an unchanged header only
+      trades the defect: the box is taller than the header's content, so
+      its foot lands in the transcript, whose scrolled content paints over
+      it and takes the clicks (`elementFromPoint` returned `.tool-head` at
+      1100 px, a text span at 375 px — a 39.3 px effective target). The
+      header pays the 6 px instead: `padding-top` 14 → 20 px, 10 → 16 px at
+      phone width. Ring rows counted off screenshots: 1–2 and 52–53 at both
+      phone widths, 5–6 and 56–57 at 1100 px, all four sides, target still
+      45.4 px and owning its own bottom-left corner.
+- [x] **D4.** The opener said "token-by-token"; the trace's deltas are
+      2–4-word chunks. Now "delta-by-delta", which is what *What it does*
+      has said since day 005. STYLE.md makes the opener the repo
+      description, so the overstatement was the repo's one-line claim too.
+- [x] `screenshot.png` re-captured last, from the built `docs/` at HEAD,
+      at the same 2200 × 1400 framing and the same moment as the image it
+      replaces (2× active, `Pause`, `0:34 / 0:47`, `edit_file` expanded on
+      INPUT and OUTPUT, turn 3 streaming behind a visible caret, the
+      three-row legend, playhead at 72.4%). The lane in it is now the lane
+      the build draws.
+- [x] Re-verified on the built artifact after all four: the live `#t=31.5`
+      path at 4× (paused, `0:31`, hash byte-identical, playhead 1.48 px
+      off), seven junk hashes ignored with `#root` intact, `-3` / `9999` /
+      `1e999` / `0x10` clamping and never rewritten, 20 drag-seeks + 5
+      play/pause firing `hashchange` 0 times with `history.length`
+      unchanged, the six keys clamping (`0:05 / 0:10 / 0:09 / 0:00 / 0:47 /
+      0:00`) and 30 repeat arrows landing `0:30` / `#t=30.0`, three legend
+      swatches equal to their sampled bar pixels, no horizontal scroll and
+      `scrollY` 0 at 320 and 375 px with the document forced 3000 px tall,
+      all 12 focus stops mid-run wearing an unclipped ring, zero console
+      and page errors, `npm run build` clean including `tsc --noEmit`, and
+      the committed `docs/` byte-identical to a fresh build of
+      `git archive HEAD`. 34/34.
+
 ## Increment 3 spec (day 008 revisit — planner artifact)
 
 *Posted to `PROJECT.md` (repo) and `HANDOFF.md` (hub) rather than as an issue comment: the GitHub API plane is gated in this sandbox. Size s–m. Last ship: day 005 (increment 2) + the day-005 evening polish pass. §4 shape.*
@@ -543,3 +618,31 @@ Two more, from defects the cycle did not close outright:
   read alike there; at 375 px they do not. Buying the extra room means
   shrinking the duration or the gaps, which is a layout change rather than a
   polish patch.
+
+### Named by cycle 2 (day 008 evening), recorded rather than built
+
+The cycle-2 defect list marked this OPEN THREAD, and the fixer did not build
+it. In the list's own words:
+
+- **`End` while playing wipes the hash instead of publishing `#t=47.7`.** The
+  seek lands on `duration_ms`, the rAF loop's own end-stop fires, and the
+  "ran out → `clearHash()`" branch swallows a user-chosen moment. Paused, the
+  same key writes `#t=47.7` correctly. Pre-existing (drag-to-far-right while
+  playing does it too), but newly reachable through a key the README now
+  advertises. The end-stop's hash-clearing is deliberate — reloading after
+  watching the demo through should replay it, not hand back a spent transcript
+  — so the honest fix is to distinguish a user-chosen end from the run's own
+  end, which is a behaviour change and wants its own spec. Spec §4.5's
+  `End` → `Play` → `#t=0.0` is unaffected and still holds.
+
+One more, noticed while measuring D1 and left alone under the freeze:
+
+- **Two marks in the lane have never cleared 3:1 against it, and still do
+  not.** Against `LANE_FILL` the user text tick measures 2.47:1 and the turn
+  divider 1.21:1 sampled (2.50 and 1.39 as composited hexes) — both are alpha
+  strokes chosen in increment 1 to sit quietly behind the bars, and both are
+  where they were on day 002. D1 was a regression defect ("the marks must keep
+  the contrast they had") and closing it restored exactly that, so raising
+  these two was out of its scope and out of the freeze's: it means re-picking
+  two colours in the lane's visual hierarchy, which changes what the timeline
+  emphasises and belongs with whoever specs the lane next.
