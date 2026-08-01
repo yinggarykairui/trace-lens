@@ -47,15 +47,25 @@ function toolsInTrace(trace: Trace): string[] {
 // the playhead carry their own contrast.
 const LANE_FILL = '#2a2f39';
 
-// How far the clock has got, as a surface rather than a tint. The old 7% amber
-// wash measured 1.14:1 against LANE_FILL — progress was legible only from the
-// 1.5 px playhead and the readout. This is 3.16:1 (WCAG's 3:1 floor for
-// meaningful non-text), which needs a real lift in lightness: nothing darker
-// than the lane can reach 3:1 against it, since black itself only reaches 1.56.
-// It stays the lane's own hue so the played region reads as the same track lit,
-// and it is painted *under* the dividers, ticks, bars and playhead, so every
-// mark keeps its exact colour and sits clearly on top of it.
-const PLAYED_FILL = '#737b8d';
+// The app's accent, and the playhead's own colour. The progress rail is drawn
+// in it too, so the rail reads as the playhead's trail rather than as a fourth
+// colour to learn.
+const ACCENT = '#e3b34c';
+
+// How far the clock has got. Progress does need a cue that clears 3:1 against
+// the unplayed track — the 7% amber wash this replaces measured 1.14:1, so
+// progress read only from the playhead and the readout — but buying that with
+// a *surface behind the marks* spends their contrast instead: the full-height
+// lighter fill that reached 3.16:1 pushed every bar, tick and divider drawn
+// over it below the same floor (the dividers to 1.07:1, visually gone), and
+// after a full playthrough the played region is the whole lane, so the legend
+// would be naming colours nothing on screen still shows. Progress and the marks
+// only compete where they share pixels, so the rail takes a band of its own:
+// 4 px along the lane's bottom edge, under the dividers' feet (HEIGHT - 4) and
+// well clear of the text ticks (HEIGHT - 10), stopping short of the playhead's
+// left edge. Nothing is drawn on top of the rail, and every mark is back on
+// LANE_FILL at exactly the contrast it had.
+const RAIL_H = 4;
 
 function draw(canvas: HTMLCanvasElement, trace: Trace, vt: number, width: number) {
   const dpr = Math.min(2, window.devicePixelRatio || 1);
@@ -76,10 +86,6 @@ function draw(canvas: HTMLCanvasElement, trace: Trace, vt: number, width: number
   // lane background
   ctx.fillStyle = LANE_FILL;
   ctx.fillRect(0, 0, width, HEIGHT);
-
-  // played region: the surface everything else is drawn on top of
-  ctx.fillStyle = PLAYED_FILL;
-  ctx.fillRect(PAD, 0, Math.max(0, x(vt) - PAD), HEIGHT);
 
   // turn dividers
   for (const ev of trace.events) {
@@ -124,9 +130,17 @@ function draw(canvas: HTMLCanvasElement, trace: Trace, vt: number, width: number
     }
   }
 
-  // playhead
+  // progress rail: its own band along the bottom edge, ending 0.75 px before
+  // the playhead's left edge so the two never share a pixel
   const phx = x(vt);
-  ctx.strokeStyle = '#e3b34c';
+  const railEnd = phx - 1.5;
+  if (railEnd > PAD) {
+    ctx.fillStyle = ACCENT;
+    ctx.fillRect(PAD, HEIGHT - RAIL_H, railEnd - PAD, RAIL_H);
+  }
+
+  // playhead
+  ctx.strokeStyle = ACCENT;
   ctx.lineWidth = 1.5;
   ctx.beginPath();
   ctx.moveTo(phx, 0);
