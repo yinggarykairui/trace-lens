@@ -41,11 +41,21 @@ body {
   flex-direction: column;
 }
 
+/* The top padding is 6px more than the design wants because .source-link's
+   44px tap target is 45.4px tall around a 20px word: with 14px here the
+   target's box started at top: -1px at 320 and 375px, so its focus ring (2px,
+   2px outside the box) was drawn at -3px and the viewport cut its top edge off
+   — three sides of the ring instead of four — and 1px of the target itself was
+   off-screen too. Moving the box down inside an unchanged header is not the
+   fix: the box is taller than the header's content, so anything that lowers it
+   pushes its foot into the transcript, where the pane's own scrolled content
+   paints over the target and takes the clicks. The header is what has to be
+   tall enough to hold a thumb-sized target. Six pixels of transcript. */
 .header {
   display: flex;
   align-items: baseline;
   gap: 12px;
-  padding: 14px 2px 10px;
+  padding: 20px 2px 10px;
   border-bottom: 1px solid var(--border);
 }
 
@@ -77,7 +87,9 @@ body {
      back, so the header does not grow by a pixel and the link still sits on
      the h1's baseline. The underline moved from border-bottom to
      text-decoration for the same reason: a border would now be drawn 13px
-     under the word instead of beneath it. */
+     under the word instead of beneath it. The header's own top padding is what
+     keeps this 45.4px box inside the header and inside the viewport — see the
+     note on .header. */
   padding: 13px 4px;
   margin: -13px -4px;
   text-decoration: underline;
@@ -447,7 +459,9 @@ body {
   }
 
   .header {
-    padding-top: 10px;
+    /* the desktop rule's 6px allowance for the source link's tap target,
+       carried over the phone value it overrides (10px) */
+    padding-top: 16px;
   }
 
   .transcript {
