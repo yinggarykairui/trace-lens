@@ -371,6 +371,65 @@ four closed, nothing added, nothing declined.
       the committed `docs/` byte-identical to a fresh build of
       `git archive HEAD`. 34/34.
 
+**Improvement cycle 3 (day 008 evening), the last cycle under
+`loop_cap: 3`.** Two clean-context passes, one APPROVE-with-nits and one
+BLOCK, agreed on the same two truth defects — both word-level, both
+against the must-pass "README is truthful" line — plus this file's own
+done-map. Three defects, three closed, nothing added, nothing declined.
+Feature freeze held: no `src/` file was opened this cycle.
+
+- [x] **D1. The README overstated the streaming granularity in the two
+      places `1863456` left standing.** The caption said the fix "streams
+      into the text pane word by word" and *What it does* said a seek
+      lands "even mid-word". Neither is reachable: `project.ts` appends
+      only whole deltas (`if (ev.t + d.dt <= vt) text += d.s`), and of the
+      trace's 87 deltas — 1–4 whole words each, 65 of them multi-word
+      (`"Pagination is "`, `"broken on the "`) — all 80 internal
+      boundaries fall on whitespace, so the pane cannot render a partial
+      word and a seek cannot land inside one. The words moved, not the
+      code: the chunked rhythm is the fixture's own and is correct. The
+      caption now reads *"the agent's fix streams into the text pane in
+      whole-word chunks"* and the timeline sentence *"seeks the replay to
+      that moment, even mid-sentence"* — true of the artifact, the
+      caption's shape and STYLE.md's 2–5 sentence slot (5) unchanged.
+      `screenshot.png` deliberately **not** re-captured: the image does
+      not depict granularity, and cycle 3 verified it against this build
+      (2× active, expanded `edit_file` card, three-row legend, the 4 px
+      amber rail, playhead at 72.8%).
+- [x] **D2. `index.html` still shipped the phrase the same commit ruled
+      untrue.** `description` and `og:description` both carried
+      "token-by-token text", and both ship inside `docs/index.html` — it
+      is what a pasted `#t=` link unfurls to a stranger who has not opened
+      it yet. Both now read "delta-by-delta text", byte-identical to the
+      README opener that STYLE.md makes the repo description. This time
+      the whole repo was grepped, `docs/` included, for `token-by-token`,
+      `word by word` and `mid-word`: the increment-1 spec line at the top
+      of this file was carrying it too and was corrected in the same
+      commit. What the grep still finds is history and stays: the
+      cycle-2 D4 entry and this entry quoting the phrase, the increment-2
+      note about the `<h1>` wrapping mid-word (a different defect, about
+      line breaks), and the §6 README draft quoted verbatim below. That
+      draft is the planner artifact as posted and is not edited after the
+      fact — it is where both phrases came from, and the shipped README
+      now departs from it in exactly the two named above.
+- [x] **D3. This done-map checked off a defect that was only half
+      closed.** Cycle 2's D4 box is unticked and now says what actually
+      happened — one of four places closed, three left standing, and the
+      grep the commit message implied but never ran.
+- [x] Re-verified after the changes, against the built `docs/` served on
+      a port checked to be free before binding and re-checked after (a
+      leftover server answering 200 from a stale build is how a previous
+      pass graded the wrong bundle): the served `index.html` is
+      byte-identical to the committed one, the served bundle is the
+      committed `index-BqEPnbYl.js`, both metadata strings carry the
+      corrected sentence, the page renders (`#root` populated, three
+      legend rows, transcript streaming), a live `#t=31.5` still lands
+      and is not rewritten, and console errors, page errors and failed
+      requests are all zero. `npm run build` clean including
+      `tsc --noEmit`; the rebuild moved `docs/index.html` only, the asset
+      hashes are unchanged; the committed `docs/` is byte-identical to a
+      fresh build from `git archive HEAD`.
+
 ## Increment 3 spec (day 008 revisit — planner artifact)
 
 *Posted to `PROJECT.md` (repo) and `HANDOFF.md` (hub) rather than as an issue comment: the GitHub API plane is gated in this sandbox. Size s–m. Last ship: day 005 (increment 2) + the day-005 evening polish pass. §4 shape.*
@@ -653,3 +712,27 @@ One more, noticed while measuring D1 and left alone under the freeze:
   these two was out of its scope and out of the freeze's: it means re-picking
   two colours in the lane's visual hierarchy, which changes what the timeline
   emphasises and belongs with whoever specs the lane next.
+
+### Named by cycle 3 (day 008 evening), recorded rather than built
+
+The cycle-3 defect list marked these OPEN THREAD: they are not defects the
+fixer may close under feature freeze, and none of them was built. In the
+list's own words, with its measurements:
+
+- **The legend's 10 px swatch is wider than two of the three bars it names.**
+  At 818 px, `read_file` renders 4 px, `edit_file` 5 px, `run_tests` 44 px.
+  The fix is a minimum bar width in `draw()`, which changes what the timeline
+  claims about durations — its own increment. Already recorded by cycle 1
+  ("the legend names bars the eye cannot find", measured 6 / 5 / 82 px on the
+  same 818 px lane); kept, and now named by two cycles.
+- **The lane renders 3.1 % vertically squashed.** `height:64` plus
+  `box-sizing:border-box` plus a 1 px border gives a 62 px content box for a
+  64-unit bitmap, so the new progress rail measures 3.875 css px rather than 4.
+  Pre-existing, cosmetic, and it wants the canvas sizing looked at as a whole.
+- **`.source-link`'s tap box overhangs `.header` by 0.125 px**, so its
+  bottom-left corner hit-tests to `.transcript`. Effective target is 45.25 px,
+  still above the 44 px floor.
+- **"the address bar and the replay stay in agreement" is false on Back to a
+  bare hash** — `#t=30.0` → Back → readout `0:30`, `location.hash === ''`.
+  Deliberate under the spec's junk rule and already disclosed (cycle 1 named
+  the same path); it belongs in the sign-off, not in a patch.
