@@ -12,6 +12,8 @@ export interface Playback {
   speed: number;
   /** Returns true when the press restarted the run from 0 (play at the end). */
   toggle: () => boolean;
+  /** Stop the clock where it is. Idempotent, and unlike toggle() never plays. */
+  pause: () => void;
   seek: (vt: number) => void;
   setSpeed: (s: number) => void;
   restart: () => void;
@@ -44,6 +46,14 @@ export function usePlayback(
     let raf = 0;
     let last = performance.now();
     const frame = (now: number) => {
+      // A frame already queued when the clock stopped is still going to fire:
+      // React tears this effect down on the next commit, not synchronously, so
+      // between a pause() and that commit there is room for exactly one frame.
+      // Left to run it would advance vt past the moment the pause was for — up
+      // to ~67 ms at 4x — and that value, not the chosen one, is what a link
+      // arriving in this tab would end up showing. playingRef is set the
+      // instant the clock stops, so this is the synchronous half of the stop.
+      if (!playingRef.current) return;
       // Clamp both ends. `last` is captured when this effect runs, but a frame
       // callback's `now` is the frame-start timestamp and can predate it, so a
       // fast play/pause toggle can hand the first frame a negative delta —
@@ -82,6 +92,15 @@ export function usePlayback(
     return restarted;
   }, [durationMs, endSlackMs]);
 
+  // Stopping the clock without the "play at the end restarts" branch toggle()
+  // carries: a link landing in this tab means "show me this moment, paused",
+  // and going through toggle() to get there would replay the run from 0 for
+  // any link into the silent tail.
+  const pause = useCallback(() => {
+    playingRef.current = false;
+    setPlaying(false);
+  }, []);
+
   const seek = useCallback(
     (target: number) => {
       const clamped = Math.max(0, Math.min(durationMs, target));
@@ -103,5 +122,5 @@ export function usePlayback(
     setPlaying(true);
   }, []);
 
-  return { vt, playing, speed, toggle, seek, setSpeed, restart };
+  return { vt, playing, speed, toggle, pause, seek, setSpeed, restart };
 }

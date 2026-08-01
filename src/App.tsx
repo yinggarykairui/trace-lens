@@ -3,7 +3,7 @@ import rawTrace from './trace.json';
 import type { Trace } from './types';
 import { projectState } from './project';
 import { END_SLACK_MS, usePlayback } from './usePlayback';
-import { parseHashTime, useHashPublisher } from './hash';
+import { parseHashTime, useHashListener, useHashPublisher } from './hash';
 import { Transcript } from './Transcript';
 import { Timeline } from './Timeline';
 
@@ -50,11 +50,15 @@ export default function App() {
     deepLink ?? 0,
     endSlackMs,
   );
-  const { toggle, seek, restart, playing, vt } = playback;
+  const { toggle, pause, seek, restart, playing, vt } = playback;
   const items = useMemo(() => projectState(trace, playback.vt), [playback.vt]);
 
   // ---- hash out: the address bar mirrors the last fixed moment ----
-  const { publish: publishHash, clear: clearHash } = useHashPublisher();
+  const {
+    publish: publishHash,
+    clear: clearHash,
+    cancel: cancelHash,
+  } = useHashPublisher();
 
   const onSeek = useCallback(
     (target: number) => {
@@ -94,14 +98,51 @@ export default function App() {
   const vtRef = useRef(vt);
   vtRef.current = vt; // read by the pause effect, which must not run per frame
   const wasPlaying = useRef(playing);
+  // Set by an arriving hash for the one pause that hash itself caused; see the
+  // hash-in adapter below.
+  const skipNextPausePublish = useRef(false);
   useEffect(() => {
     const stopped = wasPlaying.current && !playing;
     wasPlaying.current = playing;
     if (!stopped) return;
+    if (skipNextPausePublish.current) {
+      skipNextPausePublish.current = false;
+      return;
+    }
     const ranOut = vtRef.current >= trace.meta.duration_ms;
     if (ranOut) clearHash();
     else publishHash(vtRef.current);
   }, [playing, publishHash, clearHash]);
+
+  // ---- hash in: somebody else's moment landing in a tab that has one ----
+  // A `#t=` link opened in a tab already running trace-lens gets exactly what
+  // the load path gives it — open here, paused — and gives nothing back: an
+  // arriving hash is authoritative until the visitor chooses a new moment, so
+  // it is never rewritten by its own arrival, not even to its own clamped or
+  // reformatted value. Two things could write over it and both are stopped
+  // here: a debounced write still in flight from an earlier scrub (cancelled
+  // before it can land) and the publish that a pause normally makes (suppressed
+  // exactly once, and only when this really is stopping a running clock).
+  //
+  // A hash with no usable `t` is ignored outright — no seek, no pause, no
+  // write. Mid-session there is already a moment on screen, and throwing away
+  // a viewer's position over a typo is worse than a stale address bar.
+  const playingNow = useRef(playing);
+  playingNow.current = playing;
+  useHashListener(
+    useCallback(
+      (ms: number | null) => {
+        cancelHash();
+        if (ms === null) return;
+        // Pause before seeking, not after: the clock must not be left running
+        // across the seek, or a frame lands the playhead past the linked moment.
+        if (playingNow.current) skipNextPausePublish.current = true;
+        pause();
+        seek(ms); // the same clamp every other seek gets — no second path
+      },
+      [cancelHash, pause, seek],
+    ),
+  );
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
