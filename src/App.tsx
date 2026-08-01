@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef } from 'react';
 import rawTrace from './trace.json';
 import type { Trace } from './types';
 import { projectState } from './project';
-import { END_SLACK_MS, usePlayback } from './usePlayback';
+import { END_SLACK_MS, usePlayback, type SeekTarget } from './usePlayback';
 import { parseHashTime, useHashListener, useHashPublisher } from './hash';
 import { Transcript } from './Transcript';
 import { Timeline } from './Timeline';
@@ -60,10 +60,12 @@ export default function App() {
     cancel: cancelHash,
   } = useHashPublisher();
 
+  // The one seek the whole app offers: pointer, keyboard and the pointer's own
+  // drag all arrive here. seek() clamps and hands back where it landed, so the
+  // address bar publishes the moment that is actually on screen.
   const onSeek = useCallback(
-    (target: number) => {
-      seek(target);
-      publishHash(Math.max(0, Math.min(trace.meta.duration_ms, target)));
+    (target: SeekTarget) => {
+      publishHash(seek(target));
     },
     [seek, publishHash],
   );
