@@ -411,7 +411,8 @@ Feature freeze held: no `src/` file was opened this cycle.
       line breaks), and the §6 README draft quoted verbatim below. That
       draft is the planner artifact as posted and is not edited after the
       fact — it is where both phrases came from, and the shipped README
-      now departs from it in exactly the two named above.
+      now departs from it in three places: the two named above, plus the
+      caption's "two-thirds" → "three-quarters" (cycle 2's D2, `ea9e501`).
 - [x] **D3. This done-map checked off a defect that was only half
       closed.** Cycle 2's D4 box is unticked and now says what actually
       happened — one of four places closed, three left standing, and the
