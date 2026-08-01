@@ -4,13 +4,13 @@ Replay a sample LLM agent run as if it were happening live — token-by-token te
 
 ![screenshot](screenshot.png)
 
-*Mid-replay at 2×: the agent's fix streams into the text pane word by word, an expanded tool-call card above it shows the edit it just applied, and the Canvas timeline along the bottom marks the playhead two-thirds through the run.*
+*Mid-replay at 2×: the agent's fix streams into the text pane word by word, an expanded tool-call card above it shows the edit it just applied, and the Canvas timeline along the bottom marks the playhead two-thirds through the run, with a legend under the lane naming the colour of each tool's bar.*
 
 **[Live demo](https://yinggarykairui.github.io/trace-lens/)**
 
 ## What it does
 
-trace-lens replays a bundled JSON trace of a coding agent fixing an off-by-one pagination bug — three turns, five tool calls, no keys, no network requests. Text streams delta-by-delta on the trace's own rhythm; tool-call cards expand to full input and output, and stay open across a scrub back past them. A Canvas 2D timeline draws the whole run — text ticks, tool-call bars, turn boundaries — and clicking, dragging, or arrow-keying it seeks the replay to that moment, even mid-word. Play, pause, restart, and 0.5×–4× speed controls drive one shared clock, so the transcript and timeline can never disagree.
+trace-lens replays a bundled JSON trace of a coding agent fixing an off-by-one pagination bug — three turns, five tool calls, no keys, no network requests. Text streams delta-by-delta on the trace's own rhythm; tool-call cards expand to full input and output, and stay open across a scrub back past them. A Canvas 2D timeline draws the whole run — text ticks, tool-call bars coloured by tool and named in a legend under the lane, turn boundaries — and clicking, dragging, or arrow-keying it seeks the replay to that moment, even mid-word. Play, pause, restart, and 0.5×–4× speed controls drive one shared clock, so the transcript and timeline can never disagree.
 
 Pause or scrub and the moment goes into the URL as `#t=<seconds>`, so the address bar is the share link — and opening a `#t=` link in a tab that already has trace-lens running jumps the replay there and pauses, instead of doing nothing.
 
