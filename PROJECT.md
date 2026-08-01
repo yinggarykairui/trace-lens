@@ -162,6 +162,77 @@ space at 1440×900 (a layout restructure is not a polish-cycle change) ·
 `.tool-body pre` still scrolling horizontally at ≥481 px, where there is
 room for it.
 
+Increment 3 (day 008) — complete, built in the spec's A → B → C order,
+each item on its own seam:
+
+- [x] **A. Live `hashchange`.** `hash.ts` gains `useHashListener`, wired
+      at the App boundary to the load path's semantics: open here,
+      paused. `parseHashTime` is still the only parser, so the live junk
+      rules are the load junk rules. `#t=%`, `#t=5%`, `#t=%E0%A4%A`,
+      `#t=junk`, `#t=`, `#nonsense` and bare `#` are ignored outright —
+      position and play state survive, `#root` keeps its children, zero
+      console errors. `#t=-3` → 0:00, `#t=9999` → 0:47, neither
+      rewritten. Fence item *"live hashchange handling after load"*
+      closed; it is the only fence move this increment makes.
+- [x] A received hash is never rewritten by its own arrival:
+      `useHashPublisher` gains `cancel()` (drops a pending debounced
+      write without writing) and the pause a hashchange causes suppresses
+      exactly one publish. Verified byte-equal: `#t=31.5` arriving in a
+      tab playing at 4× lands on `0:31` with the hash still `#t=31.5`.
+- [x] The frame-in-flight bug the spec named. React tears the play
+      effect down on the next commit, not synchronously, so one queued
+      rAF frame could still advance vt ~67 ms past the linked moment at
+      4× — and publish that. The loop now returns early when
+      `playingRef` is false, which is set the instant the clock stops.
+      `usePlayback` gained `pause()` so the adapter need not fake one
+      through `toggle()` (which would replay from 0 for any link into
+      the silent tail).
+- [x] No self-trigger, no history growth: 20 drag-seeks + 5 play/pause
+      cycles fire `hashchange` **0** times; Back ×3 / Forward ×3 across
+      three `#t=` entries leaves `history.length` identical and the
+      readout right at every stop.
+- [x] **B. Focusable timeline + keyboard seek.** `tabIndex`,
+      `role="slider"`, `aria-valuemin/max/now/text`, an `aria-label`
+      naming the keys, and a 2 px accent `:focus-visible` ring offset
+      clear of the lane border. Six keys and no more: ←/→ ∓± 1 s,
+      Shift for 5 s, Home → 0, End → end. Canvas is the 2nd Tab stop;
+      arrows `preventDefault` (`scrollY` stays 0 with the document
+      forced scrollable at 375×600); Space still toggles play with the
+      lane focused; seeking by key does not change play state.
+- [x] **C. Tool-colour legend.** One row per distinct `tool_call` name,
+      walked from `trace.events` in first-call order, coloured through
+      the same `TOOL_COLORS` / `toolColor()` that `draw()` uses — no
+      hexes in `styles.css`, one table. Three rows (`read_file`,
+      `run_tests`, `edit_file`) whose swatches equal the sampled bar
+      pixels (`#6d94c9` / `#a488c9` / `#c9995f`); a scratch build with
+      `run_tests`' calls stripped drops that row. 18.6 px tall, no
+      horizontal scroll at 375 px, non-interactive.
+- [x] Regression: one clock, one projection — a keyboard seek to 31.0 s
+      and a reload at `#t=31.0` produce byte-identical transcript
+      `textContent`; an arrow press while playing at 2× does not pause
+      and the clock still advances 2.0 s/s. `npm run build` clean,
+      committed `docs/` byte-identical to a fresh build of `HEAD`.
+- [x] README: each item's §6 sentences landed in that item's own commit
+      sequence, never ahead of the build.
+
+**One deviation from the spec, deliberate and disclosed.** §7 says the
+key handler should compute its target from the `vt` **prop**. That
+cannot satisfy §4 item 4's own acceptance test — 30 synthetic
+`repeat: true` arrows inside 300 ms — because React does not re-render
+between dispatches in one task, so all 30 handlers read `vt = 0` and the
+run lands at 0:01 instead of 0:30 (measured on the built bundle before
+the fix). `seek()` now also accepts a function of the current vt, and
+the arrows pass `at => at ± step`; `vtRef` is current the instant a seek
+lands, so the delta resolves against the clock rather than a stale prop.
+The invariant the prop rule was protecting is intact: Timeline still
+holds no vt state, and there is still exactly one seek path, one clamp
+(now in one place only — `seek()` returns where it landed, so `onSeek`
+no longer re-clamps for the publisher) and one debounced publish.
+
+New and deliberate, per the spec's §8: a junk `hashchange` leaves the
+address bar disagreeing with the app. We ignore it rather than reset the
+viewer's position or clobber what they typed.
+
 ## Increment 3 spec (day 008 revisit — planner artifact)
 
 *Posted to `PROJECT.md` (repo) and `HANDOFF.md` (hub) rather than as an issue comment: the GitHub API plane is gated in this sandbox. Size s–m. Last ship: day 005 (increment 2) + the day-005 evening polish pass. §4 shape.*
