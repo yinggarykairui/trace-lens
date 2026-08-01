@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import type { Trace } from './types';
 import type { SeekTarget } from './usePlayback';
 
@@ -11,12 +11,36 @@ const HEIGHT = 64; // css px
 const KEY_STEP_MS = 1000;
 const KEY_STEP_SHIFT_MS = 5000;
 
+/**
+ * The one colour table. draw() paints the bars from it and the legend under the
+ * lane paints its swatches from it, through toolColor() — so the legend cannot
+ * describe a colour the canvas is not using. These hexes deliberately do not
+ * appear in styles.css: a second copy there is a second table, and the two
+ * would drift the first time one of them was edited.
+ */
 const TOOL_COLORS: Record<string, string> = {
   read_file: '#6d94c9',
   run_tests: '#a488c9',
   edit_file: '#c9995f',
 };
 const TOOL_FALLBACK = '#7f8ea3';
+
+export function toolColor(name: string): string {
+  return TOOL_COLORS[name] ?? TOOL_FALLBACK;
+}
+
+/**
+ * The distinct tool names this trace actually calls, in the order it first
+ * calls them. Walked from the events rather than listed, so the legend cannot
+ * name a tool the run never uses, or miss one it does.
+ */
+function toolsInTrace(trace: Trace): string[] {
+  const seen: string[] = [];
+  for (const ev of trace.events) {
+    if (ev.type === 'tool_call' && !seen.includes(ev.name)) seen.push(ev.name);
+  }
+  return seen;
+}
 
 // The lane's own surface. Kept a clear step above the page background so the
 // track's extent is visible even before anything is drawn into it; the bars and
@@ -73,7 +97,7 @@ function draw(canvas: HTMLCanvasElement, trace: Trace, vt: number, width: number
     if (ev.type !== 'tool_call') continue;
     const px = x(ev.t);
     const pw = Math.max(3, x(ev.t + ev.duration_ms) - px);
-    ctx.fillStyle = TOOL_COLORS[ev.name] ?? TOOL_FALLBACK;
+    ctx.fillStyle = toolColor(ev.name);
     // roundRect is Chrome 99+ / Safari 16.4+ / Firefox 112+. There is no error
     // boundary above this effect, so an older browser throwing here would
     // unmount the whole tree; square bars read fine.
@@ -118,6 +142,7 @@ export function Timeline({
 }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [width, setWidth] = useState(0);
+  const tools = useMemo(() => toolsInTrace(trace), [trace]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -197,30 +222,44 @@ export function Timeline({
   };
 
   return (
-    <canvas
-      ref={canvasRef}
-      className="timeline"
-      style={{ height: HEIGHT }}
-      tabIndex={0}
-      role="slider"
-      aria-label="run timeline — click, drag, or seek with arrow keys; hold Shift for five seconds, Home and End for the ends of the run"
-      aria-valuemin={0}
-      aria-valuemax={duration / 1000}
-      aria-valuenow={Number((vt / 1000).toFixed(1))}
-      aria-valuetext={`${(vt / 1000).toFixed(1)} seconds of ${(duration / 1000).toFixed(1)}`}
-      onKeyDown={onKeyDown}
-      onPointerDown={(e) => {
-        e.currentTarget.setPointerCapture(e.pointerId);
-        seekFromPointer(e);
-      }}
-      onPointerMove={(e) => {
-        if (e.currentTarget.hasPointerCapture(e.pointerId)) seekFromPointer(e);
-      }}
-      onPointerUp={(e) => {
-        if (e.currentTarget.hasPointerCapture(e.pointerId)) {
-          e.currentTarget.releasePointerCapture(e.pointerId);
-        }
-      }}
-    />
+    <>
+      <canvas
+        ref={canvasRef}
+        className="timeline"
+        style={{ height: HEIGHT }}
+        tabIndex={0}
+        role="slider"
+        aria-label="run timeline — click, drag, or seek with arrow keys; hold Shift for five seconds, Home and End for the ends of the run"
+        aria-valuemin={0}
+        aria-valuemax={duration / 1000}
+        aria-valuenow={Number((vt / 1000).toFixed(1))}
+        aria-valuetext={`${(vt / 1000).toFixed(1)} seconds of ${(duration / 1000).toFixed(1)}`}
+        onKeyDown={onKeyDown}
+        onPointerDown={(e) => {
+          e.currentTarget.setPointerCapture(e.pointerId);
+          seekFromPointer(e);
+        }}
+        onPointerMove={(e) => {
+          if (e.currentTarget.hasPointerCapture(e.pointerId)) seekFromPointer(e);
+        }}
+        onPointerUp={(e) => {
+          if (e.currentTarget.hasPointerCapture(e.pointerId)) {
+            e.currentTarget.releasePointerCapture(e.pointerId);
+          }
+        }}
+      />
+      {/* What the colours in the lane mean. Static and non-interactive on
+          purpose: the bars are already clickable, and a second, smaller set of
+          click targets that filtered or highlighted them would be a feature,
+          not a caption. */}
+      <ul className="legend" aria-label="tool colours in the timeline">
+        {tools.map((name) => (
+          <li key={name}>
+            <span className="legend-swatch" style={{ background: toolColor(name) }} />
+            {name}
+          </li>
+        ))}
+      </ul>
+    </>
   );
 }
