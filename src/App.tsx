@@ -180,10 +180,16 @@ export default function App() {
         </button>
         <div className="speed-group" role="group" aria-label="playback speed">
           {SPEEDS.map((s) => (
+            // aria-pressed, not role="radio"/aria-checked: these stay plain
+            // buttons inside the existing role="group", and pressed is what
+            // .is-active is drawing. Play/Pause is deliberately left without
+            // one — its label already changes between "Play" and "Pause", and
+            // aria-pressed on a button whose name flips reads the state twice.
             <button
               type="button"
               key={s}
               className={'btn btn-speed' + (playback.speed === s ? ' is-active' : '')}
+              aria-pressed={playback.speed === s}
               onClick={() => playback.setSpeed(s)}
             >
               {s}×
