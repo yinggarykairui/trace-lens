@@ -4,7 +4,7 @@ Replay a sample LLM agent run as if it were happening live — token-by-token te
 
 ![screenshot](screenshot.png)
 
-*Mid-replay at 2×: the agent's fix streams into the text pane word by word, an expanded tool-call card above it shows the edit it just applied, and the Canvas timeline along the bottom marks the playhead two-thirds through the run, with a legend under the lane naming the colour of each tool's bar.*
+*Mid-replay at 2×: the agent's fix streams into the text pane word by word, an expanded tool-call card above it shows the edit it just applied, and the Canvas timeline along the bottom marks the playhead three-quarters through the run, with a legend under the lane naming the colour of each tool's bar.*
 
 **[Live demo](https://yinggarykairui.github.io/trace-lens/)**
 
