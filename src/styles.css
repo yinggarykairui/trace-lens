@@ -370,6 +370,23 @@ body {
   border-color: var(--dim);
 }
 
+/* One focus language for the whole app. The canvas and the tool card heads
+   already wear the amber ring; without this the six controls and the source
+   link fell back to the browser's own white ring, so keyboard focus changed
+   colour as it crossed the page. Same 2px accent everywhere, offset outside
+   the control's border; an outline sits outside layout, so it cannot widen
+   the page at 320px. The tool head keeps its inset offset — the card clips
+   its overflow, and a ring drawn outside it would be cut off. */
+.btn:focus-visible,
+.header .source-link:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  /* the speed buttons overlap by 1px, so a focused one has to paint above its
+     neighbour or half its ring is covered by the next button's background */
+  position: relative;
+  z-index: 1;
+}
+
 .btn-play {
   min-width: 74px;
   font-weight: 600;
