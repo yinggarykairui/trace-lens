@@ -489,6 +489,11 @@ body {
   }
 
   .tool-summary {
-    display: none; /* name + status + duration still tell the story */
+    /* Hiding this made the two read_file cards read as the same card — the
+       only thing telling them apart is the path. It stays on one ellipsised
+       line (the head is already min-height 44px, so a truncated summary costs
+       no vertical room and cannot wrap), and shrinks a step so more of the
+       path survives the truncation at 375px. */
+    font-size: 11.5px;
   }
 }
