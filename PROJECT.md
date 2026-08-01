@@ -162,7 +162,169 @@ space at 1440×900 (a layout restructure is not a polish-cycle change) ·
 `.tool-body pre` still scrolling horizontally at ≥481 px, where there is
 room for it.
 
-Anything beyond increment 2 is a NEW increment needing a spec.
+## Increment 3 spec (day 008 revisit — planner artifact)
+
+*Posted to `PROJECT.md` (repo) and `HANDOFF.md` (hub) rather than as an issue comment: the GitHub API plane is gated in this sandbox. Size s–m. Last ship: day 005 (increment 2) + the day-005 evening polish pass. §4 shape.*
+
+---
+
+## 1. Scope
+
+**The theme: a shared link has to work on a stranger's tab, and the timeline has to answer a keyboard.** Three items, in this order.
+
+**A. Live `hashchange` handling.** This opens the fence item *"live hashchange handling after load"* — the one fence move this increment makes, and the item PROJECT.md's open threads name first.
+
+- `window.addEventListener('hashchange', …)`: on every hash navigation after load, re-read the hash through the **existing** `parseHashTime` and, when it yields a finite value, **seek to it and pause** — the same semantics the load-time deep link already has ("open here, paused").
+- A hash with no usable `t` (`#t=junk`, `#t=%`, `#t=`, `#nonsense`, bare `#`) is **ignored**: playback keeps its current position and play state. Mid-session there is already a moment on screen, and discarding a viewer's position over a typo is worse than a stale address bar. This matches the load-time junk rule, so the README's existing "a hash with no usable `t` in it is ignored" stays true without a new clause.
+- Out-of-range values clamp exactly as at load (`#t=-3` → 0, `#t=9999` → end).
+- **A received hash is never rewritten by its own arrival.** The pause that a hashchange causes publishes nothing, and any *pending* debounced write from an earlier scrub is **cancelled** before it can land on top of the incoming link. The next user-chosen pause or scrub publishes normally.
+- Our own writes stay `replaceState` (which does not fire `hashchange`), so there is no feedback loop and no new history entries.
+
+**B. A focusable timeline with keyboard seeking.** Not a fence item — an open thread PROJECT.md prices as "a feature, so it needs a spec". This is that spec.
+
+- The canvas gets `tabIndex={0}`, `role="slider"`, `aria-valuemin=0`, `aria-valuemax` = duration in seconds, `aria-valuenow` = current vt in seconds to one decimal, `aria-valuetext` (e.g. `31.5 seconds of 47.7`), and its `aria-label` updated to name the keys.
+- A visible focus ring on `:focus-visible` (accent, ≥2 px, offset so it does not sit on the lane border).
+- Keys, **only** when the canvas has focus: `←`/`→` seek ∓/± 1.0 s · `Shift+←`/`Shift+→` ∓/± 5.0 s · `Home` → 0 · `End` → end of run. Each calls the **same `onSeek` prop the pointer path calls** — same clamp, same debounced publish, no second seek path.
+- Arrow keys with the canvas focused `preventDefault()` so the page does not scroll. Key repeat is allowed and is naturally coalesced by the existing 250 ms publish debounce.
+- Seeking by key does **not** change play state — identical to click/drag. Space keeps toggling play/pause, including while the canvas is focused.
+- The empty-pane hint copy does **not** change. It already invites "scrub the timeline"; this item makes that true for keyboard users instead of making the copy smaller.
+
+**C. A legend for the timeline's tool colours.** Also an open thread, not a fence item.
+
+- A row directly under the lane: one swatch + tool name per distinct `tool_call` name, **derived by walking the trace**, not a hardcoded list, and coloured through the **same exported colour map `draw()` uses**. One colour table in the codebase, ever.
+- Static, non-interactive, ≤ 44 px tall at 375 px, wraps rather than scrolls.
+
+### Excluded — must NOT be built
+
+Fence items that **stay closed** (this increment opens only "live hashchange handling"): live model connection · BYO-key · multi-trace upload/paste · WebGL · trace editing · export · routing / state-lib / CSS-framework / localStorage · runtime deps beyond `react` + `react-dom` · second bundled trace · reduced-motion mode · **copy-link / share UI**. The last one is the adjacent temptation: making links work live makes a "Copy link" button feel obvious. The address bar is still the share UI.
+
+Also excluded, explicitly:
+
+- **The desktop dead-space layout restructure** (bottom-anchoring the transcript). PROJECT.md prices it as its own increment. Not this one.
+- `pushState`, history entries authored by the app, hash keys other than `t` (no `#speed=`, no `#card=`), per-frame hash publishing / live-mirror hash.
+- Rewriting a received hash to its clamped or normalised value.
+- Any keyboard shortcut beyond the six above — no `J/K/L`, no number keys for speed, no `,`/`.` frame-stepping, no PageUp/PageDown.
+- Legend interactivity: no click-to-filter, no hover-highlight, no tooltips or time readouts on the canvas.
+- Colour hexes duplicated into CSS, or a second colour table for the legend.
+- Screen-reader live-region announcements; `aria-live` anywhere.
+- Any edit to `src/trace.json`'s events, any new dependency, any change to the projection's shape.
+- Persisting focus, legend, or card state anywhere.
+
+---
+
+## 2. Order is not optional
+
+**A → B → C**, and A is a working v0 on its own.
+
+1. **A (live hashchange)** lands first, alone, and is committed on its own seam. It is the smallest change (a listener in the App boundary + a `cancel()` on the publisher), it closes the failure both increment-2 critics named, and it needs no CSS and no new markup. When A is committed, README-truthful, `npm run build` clean and `docs/` rebuilt, the increment satisfies the rubric by itself — that is the budget-rule checkpoint, and it must be reached before half the run is spent.
+2. **B (focus + keys)** second: it touches `Timeline.tsx` and `styles.css` only, and its correctness is checkable against A's own seek path.
+3. **C (legend)** last: pure additive UI, the cheapest to cut, and the only item that changes the screenshot's framing.
+
+The README draft in §6 is written so **each item owns its own sentences**. If the run goes sideways, ship what is committed and delete that item's sentences — do not ship a README sentence describing an item that was cut, and do not ship a half-item (a `tabIndex` with no key handler is a trap: focus that does nothing is worse than no focus).
+
+---
+
+## 3. Stack
+
+Unchanged. TypeScript + React 19 (`react` / `react-dom` 19.2.8, pinned exact) + Vite 6.4.3, `base: './'`, `outDir: 'docs/'` committed, Pages serves `/docs`. **No new runtime dependencies** — the fence forbids anything beyond `react` + `react-dom`, and nothing here needs one. DevDependencies stay pinned exact (§13). Keyless, offline, the trace compiled into the bundle. `npm run build` runs `tsc --noEmit` first and must stay clean.
+
+---
+
+## 4. Done-checklist
+
+Every item is drivable by a stranger in a headless browser against the built artifact. Duration is 47 713 ms; the lane maps time to `PAD + (t / 47713) × (width − 2·PAD)` with `PAD = 8`.
+
+1. **A live `#t=` link lands exactly, pauses, and is not rewritten.** With the tab playing at 4×, perform a real hash navigation to `#t=31.5`. Within 500 ms: the Play button reads `Play`, the readout reads `0:31`, the playhead is within **3 px** of the mapped x for 31 500 ms, and `location.hash` is still **exactly** `#t=31.5`. Repeat with the tab paused at 0:05: same result. (This is where the frame-in-flight bug lives — a rAF frame that fires after the seek and before the pause lands the playhead up to ~67 ms past the target at 4× and then publishes that wrong value over the visitor's link. The assertion is byte-equality of the hash and the exact readout, so drift fails the check.)
+
+2. **Junk and out-of-range hashchanges break nothing.** Starting paused at a known moment, navigate in turn to `#t=%`, `#t=5%`, `#t=%E0%A4%A`, `#t=junk`, `#t=`, `#nonsense`, `#`. After each: the readout and play state are **unchanged** from before the navigation, `document.getElementById('root')` still has child elements (the day-005 blocker was a permanently blank page), and the console has **zero** uncaught errors across the whole sequence. Then `#t=-3` → paused at `0:00`, `#t=9999` → paused at `0:47`, still zero errors, and neither is rewritten in the address bar.
+
+3. **No stale write, no self-trigger, no history growth.** (a) Drag-scrub the timeline and, within 100 ms of releasing, navigate to `#t=5.0`; one second later `location.hash === '#t=5.0'` and the readout is `0:05` — the pending debounced write never lands. (b) Instrument the `hashchange` listener: 20 drag-seeks and 5 pause/play cycles fire it **0** times (`replaceState` must not feed itself). (c) Navigate to `#t=5.0`, `#t=20.0`, `#t=40.0`, then Back ×3 and Forward ×3 at 60 ms intervals; after settling, the readout matches the entry's value at each stop, `history.length` is **identical** before and after the whole sequence, and the console is clean.
+
+4. **The timeline takes focus and answers keys.** With the pane empty and paused (`#t=0`), the canvas is the **2nd** element reached by Tab from the document start, `document.activeElement` is the canvas, and its `:focus-visible` computed `outline-width` is ≥ 2 px. Then, from 0:00: `→`×5 → `0:05` and `#t=5.0` · `Shift+→` → `0:10` · `←` → `0:09` · `Shift+←`×3 → `0:00` (clamped, never negative, never `-0:-1`) · `End` → `0:47` · `Home` → `0:00`. `aria-valuenow` tracks each move (one decimal). 30 synthetic `repeat: true` `→` keydowns inside 300 ms land at `0:30` with `location.hash === '#t=30.0'` and `history.length` unchanged. At 375 × 600 with the page scrollable, `window.scrollY` stays `0` through all of the above, and Space with the canvas focused toggles play without also seeking.
+
+5. **One clock, one projection — the invariant holds under keys.** Keyboard-seek to 31.0 s while paused and capture the transcript pane's `textContent`; reload the built page at `#t=31.0` and capture again — the two strings are **identical**. Separately, with the run playing at 2×, press `→` once: the run keeps playing (no pause), and 1 000 ms later the readout has advanced by 2.0 s ± 0.2 s from the seeked value — one accumulator, not two. `End` then `Play` still restarts from 0:00 and republishes `#t=0.0` (the 1 049 ms silent tail behaviour from increment 2 is unbroken).
+
+6. **The legend tells the truth about the pixels.** Exactly three rows under the lane — `read_file`, `run_tests`, `edit_file` — in trace order. For each, the swatch's computed background colour equals the colour sampled from that tool's bar in the canvas (`#6d94c9`, `#a488c9`, `#c9995f`), compared as RGB triples. The row set is derived from the trace: with a tool's `tool_call` events removed from a scratch copy of `trace.json`, its row disappears (no hardcoded names anywhere outside the shared colour map). At 375 px, `document.documentElement.scrollWidth === clientWidth` (no horizontal scroll) and the legend block's height is ≤ 44 px.
+
+7. **Nothing from increments 1–2 regressed, and the artifact is the source.** `npm run build` clean (including `tsc --noEmit`); the committed `docs/` is byte-identical to a fresh build from `git archive HEAD`; load-time `#t=` deep link, pause/scrub publishing via `replaceState`, Space toggle, 0.5–4× speeds, Restart, drag-scrub landing within **7 ms** of the playhead pixel, card expand state surviving a back-scrub past the card's birth, pinned-to-bottom autoscroll surviving a card toggle, and 375 px with no horizontal scroll all still hold. README sentences in §6 are all true of the built artifact; `screenshot.png` re-captured from this build.
+
+---
+
+## 5. Rubric lines that matter most (§8)
+
+- **"Survives garbage input without crashing"** — must-pass, and this increment *adds a runtime input surface*. Until today the hash was parsed once, at module scope; from today it is parsed every time the address bar changes, for the rest of the session. The day-005 blocker (`#t=%` → `URIError` during module evaluation → permanently blank page) is exactly the class of bug that re-enters through a listener. Checklist item 2 is the guard, and it must be run against the *built* `docs/` bundle, not the dev server.
+- **"Loads/runs without errors on first use"** — must-pass, and "first use" for this increment includes *the second link*: a recipient's first use is often a hash navigation into a tab they already had open. Item 1 is that path.
+- **"Web: usable at phone width"** — must-pass. Item C adds vertical UI directly above the controls on the one axis a 375 px phone is short of, and item B adds a focus ring that must not overflow the lane. Item 6 measures both.
+- **"README is truthful"** — must-pass, and this increment is where it is easiest to lie: keyboard affordances and "links work live" are claims a reader will test in ten seconds. Anything cut under the budget rule must lose its README sentence in the same commit.
+- **Scope discipline (scored)** — this spec opens exactly one fence item and names ten it does not. The obvious drift is a "Copy link" button, a hover time-tooltip on the lane, or clickable legend rows. Each is a fence breach or a new feature; each fails this line.
+- **Code clarity (scored)** — the single-colour-table rule and the single-`onSeek` rule are the clarity story here. A contributor must be able to see in five minutes that there is one parser, one clock, one projection, one seek, one colour map.
+
+---
+
+## 6. README-first — the exact sentences the build must make true
+
+The README keeps STYLE.md's section order and its 2–5 sentence "What it does" slot. Changes only where listed; everything else stays as shipped.
+
+**Screenshot caption (replaces the current caption; the screenshot must be re-captured from this build to match it):**
+
+> *Mid-replay at 2×: the agent's fix streams into the text pane word by word, an expanded tool-call card above it shows the edit it just applied, and the Canvas timeline along the bottom marks the playhead two-thirds through the run, with a legend under the lane naming the colour of each tool's bar.*
+
+**"What it does" — exactly five sentences, two of them revised (revisions in the timeline sentence and the share sentence):**
+
+> trace-lens replays a bundled JSON trace of a coding agent fixing an off-by-one pagination bug — three turns, five tool calls, no keys, no network requests. Text streams delta-by-delta on the trace's own rhythm; tool-call cards expand to full input and output, and stay open across a scrub back past them. A Canvas 2D timeline draws the whole run — text ticks, tool-call bars coloured by tool and named in a legend under the lane, turn boundaries — and clicking, dragging, or arrow-keying it seeks the replay to that moment, even mid-word. Play, pause, restart, and 0.5×–4× speed controls drive one shared clock, so the transcript and timeline can never disagree.
+>
+> Pause or scrub and the moment goes into the URL as `#t=<seconds>`, so the address bar is the share link — and opening a `#t=` link in a tab that already has trace-lens running jumps the replay there and pauses, instead of doing nothing.
+
+**"How to run" — the Space line is replaced by these two sentences:**
+
+> Space bar toggles play/pause. Tab to the timeline and `←`/`→` seek one second, hold Shift with them for five, and Home/End jump to the start or the end of the run.
+
+**"How to run" — one sentence appended to the existing `#t=` paragraph:**
+
+> Changing the hash of a tab that is already open — clicking another `#t=` link, or pressing Back and Forward across ones you have visited — seeks and pauses there too, so the address bar and the replay stay in agreement.
+
+**Provenance footer:**
+
+> *Day 002 (revisited day 005 and 008) of an autonomous build factory — [factory-hub](https://github.com/yinggarykairui/factory-hub)*
+
+Everything else — the one-line opener, the live-demo link, "Why it exists", LICENSE, repo description and topics — is unchanged. If item B or C is cut, its sentences above are deleted, not softened.
+
+---
+
+## 7. Architecture note
+
+Relative to the sketch in PROJECT.md:
+
+- **`src/hash.ts`** — gains a `hashchange` subscription (a small `useHashListener(onTime)` hook alongside the publisher) and a `cancel()` on `useHashPublisher` that drops a pending debounced write **without** writing. `parseHashTime` is untouched and remains the **only** parser for both the load path and the live path — never a second parser, never a second set of junk rules. It already must not throw; that requirement now extends to every keystroke a visitor makes in the address bar.
+- **`src/App.tsx`** — the hash adapter stays at the App boundary. A `hashchange` does exactly: `cancel()` any pending write → parse → `null` means return (no seek, no write, no state change) → otherwise pause, then `seek(ms)` through the existing `seek`, and suppress **exactly one** pause-publish, by the same kind of one-shot ref the initial render already uses. Ordering matters: the run must not be left playing across the seek, and no rAF frame may be allowed to advance vt past the linked moment before the pause takes effect — item 1's byte-equality assertion is the test.
+- **`src/usePlayback.ts`** — may expose a `pause()` (or a seek-and-pause) so the adapter does not have to fake one through `toggle()`. **No new rAF loop, no second accumulator, no `setInterval`.** The existing both-ends clamp in all three vt writers stays; nothing here may reintroduce a path to negative vt.
+- **`src/Timeline.tsx`** — gains `tabIndex`, `role="slider"`, the aria value attributes, an `onKeyDown`, and the legend markup as a DOM sibling under the canvas. The key handler computes a target from the `vt` **prop** and calls the **same `onSeek` prop** the pointer handlers call; clamping stays in `usePlayback.seek` where it already is. Timeline holds no vt state of its own and gains none — it stays a pure function of `(trace, vt)` plus the resize width.
+- **Colour map** — `TOOL_COLORS` / a `toolColor(name)` helper is exported from `Timeline.tsx` and consumed by both `draw()` and the legend markup. The hexes never appear in `styles.css`. The legend's rows come from walking `trace.events` for distinct `tool_call` names, so a trace change cannot make the legend lie.
+- **`src/styles.css`** — `.timeline:focus-visible` ring and a `.legend` flex row, plus its ≤480 px behaviour. No layout restructure.
+- **`src/project.ts`, `src/Transcript.tsx`, `src/trace.json`, `src/types.ts`** — untouched.
+
+**Invariants that must not break, in priority order:**
+
+1. **`projectState(trace, vt)` is pure, and playback, pointer-seek, key-seek and hash-seek all render through it.** Pane and playhead cannot disagree. Item 5's identical-`textContent` comparison is the proof obligation. Never a second event walk.
+2. **One clock.** vt lives in `usePlayback`'s ref + state and nowhere else. A hashchange and an arrow key move that clock; they do not start one.
+3. **The app never adds a history entry.** All writes go through `replaceState`; `location.hash = …` and `pushState` are forbidden. Item 3(c) measures `history.length`.
+4. **A received hash is authoritative until the user chooses a new moment.** Arrival never writes, and never lets an older pending write land on top of it.
+5. **The hash carries `t` only, at 0.1 s resolution, floored to match the readout.** Unchanged.
+6. **Nothing in a draw effect or a listener may throw unguarded.** There is still no error boundary above the tree; a throw is a blank page. `roundRect` and `ResizeObserver` stay feature-detected.
+
+---
+
+## 8. Open threads left open
+
+- **Desktop dead space** (~700 px at 1440 × 900 at load, 139 px above the timeline mid-run). The honest fix is bottom-anchoring the transcript so it fills upward like a console. Still its own increment; explicitly not this one.
+- **Fence items still closed and still the likeliest next moves:** second bundled trace (a contrast run) · reduced-motion mode. Copy-link/share UI stays closed — this increment is the argument that it is unnecessary.
+- **Deliberate and unchanged:** the hash mirrors the last paused/scrubbed moment, not the live playhead · tenths-of-a-second resolution, so a reopened link can sit up to 99 ms behind the sharer · `#t=0x10` seeks to 16 s because `parseHashTime` is `Number()`-lenient (harmless).
+- **New, deliberate, to be disclosed in the sign-off:** a junk `hashchange` leaves the address bar disagreeing with the app — we ignore it rather than reset the viewer's position or clobber what they typed. Revisit only if it confuses a real recipient.
+- **Not specced, and priced for later:** announcing the seeked moment to a screen reader (needs a live region, and `role="slider"`'s value attributes are the cheaper first move) · a time readout or tooltip on the lane itself · keyboard access to the tool cards beyond the Tab order they already have.
+- **Verification debt, unchanged:** no scheduled shift has ever loaded `https://yinggarykairui.github.io/trace-lens/` — `github.io` is unreachable from these sandboxes, so §11.2's live-demo line and the repo description/topics check still fall to a desk session. What is verifiable here, and must be re-verified at ship, is that the committed `docs/` is byte-identical to a fresh build of `HEAD`.
+
+Anything beyond increment 3 is a NEW increment needing a spec.
+
 
 ## Open threads
 
