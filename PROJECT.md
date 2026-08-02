@@ -238,7 +238,18 @@ New and deliberate, per the spec's §8: a junk `hashchange` leaves the
 address bar disagreeing with the app. We ignore it rather than reset the
 viewer's position or clobber what they typed.
 
-**Improvement cycle 1 (day 008 evening), against the merged defect list
+*A note on the labels below, added by the day-008 evening polish shift.
+These three cycles were labelled "day 008 evening" and they were not: their
+commits landed 2026-08-01 20:04–21:25 UTC, which is 13:04–14:25 PT — the
+noon build shift that shipped increment 3, running §7's loop cap on its own
+build. The 20:00 PT evening shift is the separate section further down
+("Evening polish (day 008, the 20:00 PT shift)"), whose commits landed
+2026-08-02 03:38–04:52 UTC = 20:38–21:52 PT. Five things called "cycle N,
+day 008 evening" in one file made every cross-reference ambiguous, so the
+build shift's series is named for the shift that ran it. Only the labels
+changed; no cycle's content was rewritten.*
+
+**Improvement cycle 1 (day 008 build shift), against the merged defect list
 of the playtester and the three critics.** Feature freeze held: seven
 defects closed, one declined, nothing added. Every measurement below was
 taken against the built `docs/`, driven headlessly.
@@ -325,7 +336,7 @@ taken against the built `docs/`, driven headlessly.
       including `tsc --noEmit`, and the committed `docs/` is
       byte-identical to a fresh build of `git archive HEAD`.
 
-**Improvement cycle 2 (day 008 evening), against the merged list of two
+**Improvement cycle 2 (day 008 build shift), against the merged list of two
 independent clean-context verifiers.** Both returned BLOCK on the same
 thing: a regression cycle 1 itself introduced. Four defects on the list,
 four closed, nothing added, nothing declined.
@@ -407,7 +418,7 @@ four closed, nothing added, nothing declined.
       the committed `docs/` byte-identical to a fresh build of
       `git archive HEAD`. 34/34.
 
-**Improvement cycle 3 (day 008 evening), the last cycle under
+**Improvement cycle 3 (day 008 build shift), the last cycle under
 `loop_cap: 3`.** Two clean-context passes, one APPROVE-with-nits and one
 BLOCK, agreed on the same two truth defects — both word-level, both
 against the must-pass "README is truthful" line — plus this file's own
@@ -592,8 +603,8 @@ does not support, and the fixer did not check either before building.
       untouched.
 
 **Open threads this shift knowingly leaves.** Consolidated from the three
-"Named by cycle N" lists above and the two evening cycles; the entries
-there stand, this is the de-duplicated ship-facing set.
+"Named by cycle N (day 008 build shift)" lists below and this evening's two
+cycles; the entries there stand, this is the de-duplicated ship-facing set.
 
 - The legend's 10 px swatch is wider than three of the five bars it names
   (`read_file` 3 + 3 px, `edit_file` 5 px, against `run_tests` 42 + 40 px
@@ -909,7 +920,7 @@ Anything beyond increment 3 is a NEW increment needing a spec.
   byte-identical to a fresh `npm run build` from `git archive HEAD`, so the
   deploy serves what the source says.
 
-### Named by cycle 1 (day 008 evening), recorded rather than built
+### Named by cycle 1 (day 008 build shift), recorded rather than built
 
 The merged defect list marked these OPEN THREAD: they are not defects the
 fixer may close under feature freeze, and none of them was built. In the
@@ -967,7 +978,7 @@ Two more, from defects the cycle did not close outright:
   shrinking the duration or the gaps, which is a layout change rather than a
   polish patch.
 
-### Named by cycle 2 (day 008 evening), recorded rather than built
+### Named by cycle 2 (day 008 build shift), recorded rather than built
 
 The cycle-2 defect list marked this OPEN THREAD, and the fixer did not build
 it. In the list's own words:
@@ -1002,7 +1013,7 @@ One more, noticed while measuring D1 and left alone under the freeze:
   two colours in the lane's visual hierarchy, which changes what the timeline
   emphasises and belongs with whoever specs the lane next.
 
-### Named by cycle 3 (day 008 evening), recorded rather than built
+### Named by cycle 3 (day 008 build shift), recorded rather than built
 
 The cycle-3 defect list marked these OPEN THREAD: they are not defects the
 fixer may close under feature freeze, and none of them was built. In the
