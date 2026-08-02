@@ -595,7 +595,7 @@ Relative to the sketch in PROJECT.md:
 
 - **Desktop dead space** (~700 px at 1440 × 900 at load, 139 px above the timeline mid-run). The honest fix is bottom-anchoring the transcript so it fills upward like a console. Still its own increment; explicitly not this one.
 - **Fence items still closed and still the likeliest next moves:** second bundled trace (a contrast run) · reduced-motion mode. Copy-link/share UI stays closed — this increment is the argument that it is unnecessary.
-- **Deliberate and unchanged:** the hash mirrors the last paused/scrubbed moment, not the live playhead · tenths-of-a-second resolution, so a reopened link can sit up to 99 ms behind the sharer · `#t=0x10` seeks to 16 s because `parseHashTime` is `Number()`-lenient (harmless).
+- **Deliberate and unchanged:** the hash mirrors the last paused/scrubbed moment, not the live playhead · `#t=0x10` seeks to 16 s because `parseHashTime` is `Number()`-lenient (harmless). *(The "tenths-of-a-second resolution, so a reopened link can sit up to 99 ms behind the sharer" item that stood here is closed by `62fd5fe`: the hash publishes hundredths and the worst case is 9 ms. See the Open threads note below, which this line used to contradict.)*
 - **New, deliberate, to be disclosed in the sign-off:** a junk `hashchange` leaves the address bar disagreeing with the app — we ignore it rather than reset the viewer's position or clobber what they typed. Revisit only if it confuses a real recipient.
 - **Not specced, and priced for later:** announcing the seeked moment to a screen reader (needs a live region, and `role="slider"`'s value attributes are the cheaper first move) · a time readout or tooltip on the lane itself · keyboard access to the tool cards beyond the Tab order they already have.
 - **Verification debt, unchanged:** no scheduled shift has ever loaded `https://yinggarykairui.github.io/trace-lens/` — `github.io` is unreachable from these sandboxes, so §11.2's live-demo line and the repo description/topics check still fall to a desk session. What is verifiable here, and must be re-verified at ship, is that the committed `docs/` is byte-identical to a fresh build of `HEAD`.
@@ -693,9 +693,11 @@ defect list's own words:
 - **Restart from paused starts playing** and writes `#t=0.0`, so a reload after
   two ordinary clicks lands on the blank paused pane.
 - **Back past the first `#t=` lands on a bare `''` hash**, which has no usable
-  `t` and is therefore ignored, so the address bar and the replay disagree —
-  against the README's "stay in agreement" sentence. Deliberate under the spec's
-  junk rule; worth a sentence in the sign-off.
+  `t` and is therefore ignored, so the address bar and the replay disagree.
+  Deliberate under the spec's junk rule; worth a sentence in the sign-off. The
+  half of this that was a truth defect is closed: `8a3baab` deleted the
+  README's "stay in agreement" clause and said what Back actually does, so
+  `grep "stay in agreement" README.md` returns 0 hits. The behaviour stays.
 - **Expanding all five cards at the end leaves 129 px below the fold**
   (`scrollTop 1337 + 600` vs `scrollHeight 2066`).
 - **`index.html`'s favicon data URI repeats `#6d94c9` and `#c9995f`** — a third
@@ -776,4 +778,6 @@ list's own words, with its measurements:
 - **"the address bar and the replay stay in agreement" is false on Back to a
   bare hash** — `#t=30.0` → Back → readout `0:30`, `location.hash === ''`.
   Deliberate under the spec's junk rule and already disclosed (cycle 1 named
-  the same path); it belongs in the sign-off, not in a patch.
+  the same path); it belongs in the sign-off, not in a patch. **Closed as a
+  truth defect** by the day-008 evening polish: `8a3baab` deleted the clause
+  and the README now says what Back does. The behaviour is unchanged.
