@@ -468,6 +468,22 @@ body {
   position: relative;
 }
 
+/* The only place in the app where a ring can land on an amber surface that is
+   not its own control: the chips touch (they overlap by 1px), and one of the
+   four is always the selected one. The ring is drawn 2 to 4px outside the
+   focused chip's border box, which is inside the next chip — so against a
+   selected neighbour it and the fill were one amber run, and the ring read as
+   an open-sided "C". The dark edge has to be on the ring's outer boundary to
+   stop that, so it is a shadow spread wider than the outline's outer edge: the
+   shadow paints --bg 0 to 6px out and the outline paints the amber back over
+   the middle of it, leaving 2px of --bg on both sides of the ring. Nothing
+   else needs this — everywhere else the page is already --bg, so the moat is
+   there for free — and the ring itself is the same 2px accent at the same 2px
+   offset as every other ring. Costs the neighbour 6px of its 40.7px fill. */
+.btn-speed:focus-visible {
+  box-shadow: 0 0 0 6px var(--bg);
+}
+
 /* The one control where "selected" and "focused" meet, and both were the same
    amber: a 2px ring 2px outside a solid amber fill read as a double amber box.
    Focused, the selected chip takes a dark edge of its own — its border and 2px
