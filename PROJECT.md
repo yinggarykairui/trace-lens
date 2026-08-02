@@ -622,6 +622,24 @@ there stand, this is the de-duplicated ship-facing set.
   shipped build — `html`, `body` and `#root` are `height: 100%`, so the
   document has never been scrollable — and measured only with a 4 000 px
   spacer forced into the page.
+- Restart from paused starts playing and writes `#t=0.0`, so a reload after
+  two ordinary clicks lands on the blank paused pane. Re-measured tonight:
+  paused at `#t=20`, one Restart click leaves the button reading `Pause` and
+  the hash `#t=0.0`.
+- `index.html`'s favicon `data:` URI carries a third copy of `#6d94c9` and
+  `#c9995f` (`%236d94c9`, `%23c9995f`) outside `TOOL_COLORS`. Pre-existing
+  since day 005; the one-colour-table rule holds inside `src/`, and the
+  markup the bundler copies is the exception nobody has closed.
+- Two lane marks have never cleared 3:1 against `LANE_FILL` and still do
+  not: the user text tick 2.47:1 sampled (2.50 as a composited hex,
+  `rgba(139, 147, 161, 0.6)`) and the turn divider 1.21:1 sampled (1.39
+  composited, `rgba(139, 147, 161, 0.22)`). Both are increment-1 alpha
+  strokes chosen to sit quietly behind the bars; raising them means
+  re-picking two colours in the lane's hierarchy.
+- Expanding all five cards at the end of the run leaves content below the
+  fold: at 1280 × 800 on `#t=47.71`, `scrollTop 1577 + clientHeight 594`
+  against `scrollHeight 2300` — **129 px** unseen, and the pane does not
+  re-pin.
 - `#t=0x10` seeks to 0:16, because `parseHashTime` is `Number()`-lenient.
 - `aria-valuenow` drops the decimal at whole seconds; React types the
   attribute as `number` and the one-decimal string fails `tsc --noEmit`.
