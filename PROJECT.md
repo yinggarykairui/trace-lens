@@ -792,11 +792,18 @@ Anything beyond increment 3 is a NEW increment needing a spec.
 ## Open threads
 
 - Likeliest next fence moves (an owner issue would open one), best first:
-  **live hashchange handling** — a `#t=` link clicked into an already-open
-  tab does nothing and the address bar then disagrees with the app; both
-  increment-2 critics named it the one path where a share link fails a real
-  recipient, so it is the fence item to open next. Then: second bundled
-  trace (contrast run) · reduced-motion mode.
+  second bundled trace (contrast run) · reduced-motion mode. Copy-link /
+  share UI stays closed — increment 3 is the argument that the address bar
+  is already the share UI.
+- **Closed** (increment 3, day 008). **Live hashchange handling** stood here
+  as "the fence item to open next" — a `#t=` link clicked into an
+  already-open tab did nothing and the address bar then disagreed with the
+  app, the one path both increment-2 critics named where a share link fails
+  a real recipient. Increment 3 opened it and closed it, and it is the only
+  fence move that increment made: `useHashListener` re-reads the hash on
+  every navigation through the same `parseHashTime`, seeks and pauses on a
+  finite value, ignores junk, and never rewrites what it received. See the
+  done-map's increment-3 item A.
 - Deliberate: the hash mirrors the last paused/scrubbed moment, not the
   live playhead (no per-frame replaceState). Revisit only if it confuses.
 - **Closed** (day 008 evening polish). The hash carried tenths of a second,
@@ -837,12 +844,19 @@ Anything beyond increment 3 is a NEW increment needing a spec.
   ~700 px of dead space at 1440×900 at load and a 139 px gap above the
   timeline mid-run, because content is top-aligned — the honest fix is
   bottom-anchoring the transcript so it fills upward like a console, which
-  is a layout change and wants its own increment · the canvas is
-  unfocusable (`tabIndex`/`role` unset) so keyboard users cannot seek at
-  all, while the empty-pane hint invites them to "scrub the timeline" —
-  adding arrow-key seeking is a feature, so it needs a spec, but the copy
-  and the capability should agree · the timeline's three tool colours have
-  no legend, so the bars read as unlabelled debris to a first-time viewer.
+  is a layout change and wants its own increment.
+- **Closed** (increment 3, day 008). The other two items that stood in the
+  line above shipped with it. The canvas was unfocusable (`tabIndex` /
+  `role` unset) so keyboard users could not seek at all, while the
+  empty-pane hint invited them to "scrub the timeline"; measured on the
+  built `docs/`, the canvas now carries `tabIndex 0`, `role="slider"` and
+  `aria-valuemin/max/now/text`, and from 0:00 with it focused
+  `→`×5 → `0:05` · `Shift+→` → `0:10` · `←` → `0:09` · `End` → `0:47` ·
+  `Home` → `0:00`, so the copy and the capability agree. And the timeline's
+  three tool colours had no legend, so the bars read as unlabelled debris to
+  a first-time viewer; there is a legend under the lane now — three entries
+  (`read_file`, `run_tests`, `edit_file`) in **one row**, 18.59 px tall,
+  swatches painted from the same `TOOL_COLORS` `draw()` uses.
 - Verification debt, not a code defect: no scheduled shift has ever loaded
   `https://yinggarykairui.github.io/trace-lens/`. The sandboxes those
   shifts run in cannot reach `github.io` at all, so §11.2's live-demo line
