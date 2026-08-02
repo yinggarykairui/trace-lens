@@ -149,7 +149,19 @@ export default function App() {
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.code !== 'Space') return;
-      e.preventDefault(); // no page scroll, no focused-button re-activation
+      // Space is the activation key of whatever control has focus, and this
+      // listener sees it first. Calling preventDefault() here regardless of the
+      // target cancelled the browser's own activation click, so Space on
+      // Restart, on a speed button or on a tool-card head ran nothing and
+      // started the clock instead — the wrong action, silently. Leave those
+      // alone: a <button>, or anything wearing role="button" / aria-expanded,
+      // activates itself and this handler stays out of it. Everything else —
+      // the body with nothing focused, and the timeline canvas, whose own
+      // keydown deliberately passes Space through — still toggles play, and
+      // still preventDefault()s so the page cannot scroll.
+      const el = e.target as Element | null;
+      if (el?.closest?.('button, [role="button"], [aria-expanded]')) return;
+      e.preventDefault();
       if (!e.repeat) onToggle();
     };
     window.addEventListener('keydown', onKey);
