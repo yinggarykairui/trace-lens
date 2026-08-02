@@ -610,13 +610,24 @@ there stand, this is the de-duplicated ship-facing set.
   and raising these was declined as out of a polish cycle's scope.
 - `.transcript:focus-visible`'s inset ring paints over content scrolled
   under it when the pane is pinned to the bottom: at 500 × 300 the topmost
-  partly-visible line's box starts 6.05 px above the ring's inner edge. The
+  partly-visible line's box starts 6.05 px above the ring's **outer** edge —
+  8.05 above the inner one. (The number was always right and the noun was
+  not: at 500 × 300 pinned to the bottom the pane top is 54.25, the 2 px
+  ring occupies 56.25–58.25, and the line box top is 50.20.) The
   ring has to be inset — the pane clips, so an outside ring would be cut off
   at the header and the lane — so the fix is scroll padding, not a ring.
 - `.transcript` and `.tool-body pre` are only tab-reachable in narrow
   windows, because Chrome focuses a scroller only when it has no focusable
   descendants: the pane at ~812 × 375 before the first card appears, the
-  `pre` at ~481–640 px wide.
+  `pre` at viewport widths **481–618 px**. Swept a pixel at a time tonight
+  with all five cards expanded, and both edges are mechanical rather than
+  approximate: at ≤480 the phone query gives `.tool-body pre`
+  `white-space: pre-wrap`, so it stops overflowing at all (481 focusable,
+  480 not); above that the widest payload line is a fixed 551 px against a
+  `clientWidth` of `viewport − 68`, so the overflow runs out when the
+  viewport reaches 619 (618 focusable, 619 not). The `~481–640` this said
+  before overstated the top by 21 px; a 20 px-grid sweep anchored at 500
+  reads the range as "500–600", which is the grid and not the boundary.
 - Space at a scroll pane's own end chains to the document, exactly as
   PageDown, ArrowDown and End already did there. Not reachable in the
   shipped build — `html`, `body` and `#root` are `height: 100%`, so the
