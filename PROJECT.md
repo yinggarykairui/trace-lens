@@ -263,14 +263,26 @@ taken against the built `docs/`, driven headlessly.
       exact colour: the legend swatches still equal their bar pixels.
 - [x] **D4.** The six controls and the `source` link fell back to
       Chromium's white ring while the canvas and the cards wore the
-      amber one. One `:focus-visible` rule now: nine focusable stops,
-      all `2px rgb(227, 179, 76)`.
+      amber one. One `:focus-visible` rule now. Re-measured on the built
+      `docs/` after the evening shift's cycle-2 rework, at `#t=34.0` and
+      at 1440 × 900, 375 × 667 and 320 × 568: **12 focus stops at each
+      width** — the `source` link, four tool-card heads, the canvas,
+      Play, four speed chips, Restart — each a 2 px `rgb(227, 179, 76)`
+      ring, in **two geometries and no more**: outside the border box at
+      `outline-offset: 2px` (the eight that clip nothing) and inside it
+      at `-2px` (the four card heads, whose card clips its overflow).
+      The two overflow-driven panes, `.transcript` and `.tool-body pre`,
+      take the inset one when a narrow window makes them tab stops. No
+      ring is clipped on any of its four sides at any of the three
+      widths, and the lowest ratio a ring measures against a surface it
+      touches is 7.32:1 (`--border`, on the inset heads); everything
+      else is 8.98:1 (`--panel`) or 9.66:1 (the page).
 - [x] **D5.** `aria-pressed` on each speed button, mirroring
       `.is-active` and following a speed change. Play/Pause deliberately
       left alone — its accessible name already changes.
 - [x] **D6.** `source` 41.5 × 20.4 → **49.5 × 45.4 px** (padded, then
-      pulled back by equal negative margins, so the header still
-      measures 44.3 px at 375 px and 48.3 px at 1100 px); speed buttons
+      pulled back by equal negative margins, so the header grew by
+      nothing on its own account); speed buttons
       40.7 → **54 × 44 px**, and only at 480 px and below — the floor was
       written inside the phone-width query, so every wider viewport kept
       33.7 px whether or not a thumb was doing the pointing. It follows
@@ -279,7 +291,14 @@ taken against the built `docs/`, driven headlessly.
       766 × 44 at 812 × 375; 74 / 54 / 722 × 44 at 768 × 1024), and
       unchanged for a fine pointer (33.7 / 33.7 / 34.6 px at 1100 × 700,
       which is the metric the committed screenshot shows).
-      `scrollWidth === clientWidth` at 320 and 375 px.
+      `scrollWidth === clientWidth` at 320 and 375 px. The header numbers
+      this line carried — 44.3 px at 375 px, 48.3 px at 1100 px — were
+      measured before cycle 2's own D3, which bought the source link's
+      ring six pixels of `padding-top` (`PROJECT.md` D3, twenty lines
+      below) and was landed the same night. `326e80d` rewrote this line
+      afterwards and left them standing. Measured on the built `docs/`:
+      **50.25 px at 320 and 375 px, 54.25 px at 1100 px** (also 54.25 at
+      1440), `padding-top` 16 px and 20 px.
 - [x] **D8.** `.tool-summary` was `display:none` below 481 px, so the
       two `read_file` cards read identically on a phone. Restored on one
       ellipsised line, half a point smaller: at 375 px the first shows
