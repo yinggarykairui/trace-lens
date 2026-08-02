@@ -270,8 +270,15 @@ taken against the built `docs/`, driven headlessly.
 - [x] **D6.** `source` 41.5 × 20.4 → **49.5 × 45.4 px** (padded, then
       pulled back by equal negative margins, so the header still
       measures 44.3 px at 375 px and 48.3 px at 1100 px); speed buttons
-      40.7 → **44 × 44 px**. `scrollWidth === clientWidth` at 320 and
-      375 px.
+      40.7 → **54 × 44 px**, and only at 480 px and below — the floor was
+      written inside the phone-width query, so every wider viewport kept
+      33.7 px whether or not a thumb was doing the pointing. It follows
+      the input device now: **44 px under `(pointer: coarse)` at any
+      width** (`.btn` 74 × 44, `.btn-speed` 54 × 44, `.tool-head`
+      766 × 44 at 812 × 375; 74 / 54 / 722 × 44 at 768 × 1024), and
+      unchanged for a fine pointer (33.7 / 33.7 / 34.6 px at 1100 × 700,
+      which is the metric the committed screenshot shows).
+      `scrollWidth === clientWidth` at 320 and 375 px.
 - [x] **D8.** `.tool-summary` was `display:none` below 481 px, so the
       two `read_file` cards read identically on a phone. Restored on one
       ellipsised line, half a point smaller: at 375 px the first shows
