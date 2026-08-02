@@ -11,6 +11,13 @@ const trace = rawTrace as unknown as Trace;
 
 const SPEEDS = [0.5, 1, 2, 4];
 
+// What Space already belongs to, so the window handler below leaves it there.
+// Buttons (and anything wearing the role or aria-expanded) activate themselves.
+// The two scroll panes are here for the same reason: Chrome makes an
+// overflowing scroller a tab stop, and Space is that stop's own page-down key.
+const SPACE_IS_NOT_OURS =
+  'button, [role="button"], [aria-expanded], .transcript, .tool-body pre';
+
 // Read once, before the first render: a usable #t= means "open here, paused",
 // which overrides autoplay. No hash, or an unusable one, loads normally.
 const deepLink = parseHashTime(window.location.hash);
@@ -154,13 +161,15 @@ export default function App() {
       // target cancelled the browser's own activation click, so Space on
       // Restart, on a speed button or on a tool-card head ran nothing and
       // started the clock instead — the wrong action, silently. Leave those
-      // alone: a <button>, or anything wearing role="button" / aria-expanded,
-      // activates itself and this handler stays out of it. Everything else —
-      // the body with nothing focused, and the timeline canvas, whose own
-      // keydown deliberately passes Space through — still toggles play, and
-      // still preventDefault()s so the page cannot scroll.
+      // alone: see SPACE_IS_NOT_OURS. The same went for the two scroll panes
+      // once they became tab stops — every other scroll key paged them
+      // (PageDown 0 → 82, ArrowDown 0 → 40, End 0 → 159 at 500 × 300) while
+      // Space alone toggled the replay and left scrollTop at 0. Everything
+      // else — the body with nothing focused, and the timeline canvas, whose
+      // own keydown deliberately passes Space through — still toggles play,
+      // and still preventDefault()s so the page cannot scroll.
       const el = e.target as Element | null;
-      if (el?.closest?.('button, [role="button"], [aria-expanded]')) return;
+      if (el?.closest?.(SPACE_IS_NOT_OURS)) return;
       e.preventDefault();
       if (!e.repeat) onToggle();
     };
