@@ -22,7 +22,7 @@ Open the [live demo](https://yinggarykairui.github.io/trace-lens/), or locally:
     npm run dev        # dev server
     npm run build      # builds to docs/ (served by GitHub Pages)
 
-Space bar toggles play/pause. Tab to the timeline and `←`/`→` seek one second, hold Shift with them for five, and Home/End jump to the start or the end of the run.
+Space bar toggles play/pause. A focused button or scroll pane keeps Space for itself. Tab to the timeline and `←`/`→` seek one second, hold Shift with them for five, and Home/End jump to the start or the end of the run.
 
 Add `#t=<seconds>` to the URL to open the replay paused at that second — `#t=12.4`, or whatever the address bar picked up when you last paused. Values outside the run are clamped to its start or end. A hash with no usable `t` in it is ignored, and the replay starts from the top as usual. Changing the hash of a tab that is already open — clicking another `#t=` link, or pressing Back and Forward across `#t=` entries you have visited — seeks and pauses there too. Backing out past the first one leaves the address bar empty and the replay where it was.
 
