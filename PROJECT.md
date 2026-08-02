@@ -613,9 +613,24 @@ Anything beyond increment 3 is a NEW increment needing a spec.
   trace (contrast run) · reduced-motion mode.
 - Deliberate: the hash mirrors the last paused/scrubbed moment, not the
   live playhead (no per-frame replaceState). Revisit only if it confuses.
-- Deliberate: the hash carries tenths of a second, floored to match the
-  on-screen readout, so a reopened link can sit up to 99 ms behind the
-  sharer's playhead. Invisible in practice.
+- **Closed** (day 008 evening polish). The hash carried tenths of a second,
+  floored, so a reopened link sat up to 99 ms behind the sharer's playhead —
+  recorded here as "invisible in practice", which measurement disproved. Text
+  arrives in whole-word chunks closer together than 99 ms: over 25 random
+  scrubs, reloading at each published hash, **2 came back a word-chunk short**
+  of what the sharer had on screen (`#t=5.9` lost `"bounds are "`, `#t=27.5`
+  lost `"— exactly what "`) — roughly one scrub in twelve, on the increment
+  whose premise is that the address bar is the share link. `formatHashTime`
+  floors to hundredths now and drops a trailing zero, so a moment that lands
+  on a tenth still publishes the string it always did (`#t=12.4`, `#t=0.0`)
+  and only a moment that needs the second digit spends it (`#t=5.93`); the
+  worst case is 9 ms, which is inside a chunk rather than across one. Graded
+  on the built `docs/`, same 25 scrubs both ways: **25/25** byte-equal
+  transcripts at the published hash, 23/25 at the same moments floored to
+  tenths (`#t=27.5` and `#t=34.4` short). `parseHashTime` is untouched —
+  `Number()` reads both, so old links still work. This supersedes the
+  increment-3 spec's §7 item 5 and its §8 "tenths-of-a-second resolution"
+  line, which describe the format as it was before tonight.
 - Increment 2's four kept nits are **closed** by the day-005 evening polish
   pass (above): the `<h1>` wrap, the orphaned hint, the caret ranges, and
   the latent no-events `lastContentMs` seed. Only `#t=0x10`'s parsing
