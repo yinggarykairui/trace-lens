@@ -114,6 +114,18 @@ body {
   line-height: 1.65;
 }
 
+/* Chrome makes a scroll container a tab stop once it actually overflows, so the
+   pane joins the tab order at short viewports and wore the browser's own white
+   1px ring while everything around it wore the app's amber. Same ring as the
+   rest of the app, inset like the tool head's: the pane clips its own overflow,
+   so a ring outside the box would be cut off at the edges it shares with the
+   header and the lane. Nothing changes when it does not overflow — it is not
+   focusable then. */
+.transcript:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+
 .transcript.is-empty {
   /* the hint is the pane's only content, and a single line pinned to the top of
      a 700px pane reads as a stray caption rather than as the pane's own state */
@@ -265,6 +277,16 @@ body {
   font-family: var(--mono);
   font-size: 12px;
   line-height: 1.5;
+}
+
+/* The other overflow-driven tab stop, and the other white UA ring — see
+   .transcript. Inset for two reasons here: the card clips its overflow, and an
+   outline outside this box would be drawn over the payload's own border. An
+   inset outline is positioned on the border box, so the pre's horizontal scroll
+   does not slide it out of view. */
+.tool-body pre:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
 }
 
 .tool-dot {
