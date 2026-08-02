@@ -29,7 +29,12 @@ and D3; move ONE fence item in: URL-hash deep-links.
 model connection · BYO-key · multi-trace upload/paste · WebGL · trace
 editing · export · routing/state-lib/CSS-framework/localStorage · runtime
 deps beyond react + react-dom · second bundled trace · reduced-motion mode ·
-live hashchange handling after load · copy-link/share UI.
+copy-link/share UI.
+
+**Moved out of the fence:** URL-hash deep-links (increment 2) · live
+hashchange handling after load (increment 3, the only fence move that
+increment made — see the done-map and the Open threads section, both of
+which record it closed).
 
 ## Architecture sketch
 
