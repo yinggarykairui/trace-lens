@@ -427,13 +427,6 @@ body {
 .header .source-link:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
-  /* The ring's own inner edge, rather than whatever happens to be behind the
-     control. The amber ring alone is invisible against an amber surface, and
-     the app has two of those — the selected speed button's fill and the lane's
-     progress rail — so the ring carries a dark edge with it: amber outside for
-     the dark page, --bg inside for the amber. It fills exactly the 2px the
-     outline-offset opens, so nothing moves and nothing else changes colour. */
-  box-shadow: 0 0 0 2px var(--bg);
   /* the speed buttons overlap by 1px, so a focused one has to paint above its
      neighbour or half its ring is covered by the next button's background */
   position: relative;
