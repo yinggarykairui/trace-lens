@@ -557,9 +557,13 @@ does not support, and the fixer did not check either before building.
 - [x] Space was stolen from the two panes cycle 1 had just promoted to tab
       stops: the new exception list covered buttons only, so Space toggled
       the replay while every other scroll key paged the pane (at 500 × 300
-      on `#t=8`, PageDown 0 → 82, ArrowDown 0 → 40, End 0 → 206, Space
+      on `#t=8`, PageDown 0 → 82, ArrowDown 0 → 40, End 0 → 159, Space
       0 → 0). The panes are in the list now and Space pages them natively
-      (`6652d08`).
+      (`6652d08`). The `End` figure read 206 until this pass: 159 is the
+      pane's whole scroll range there (`scrollHeight 253 −
+      clientHeight 94`), so 206 was never reachable. Re-measured on both the
+      pre-fix build and HEAD; `src/App.tsx`'s own comment has said 159 since
+      `6652d08`.
 - [x] Two README sentences. "Space bar toggles play/pause" is conditional
       since `d59fafe`, and now qualified (`c94e90a`). The provenance
       footer read `Day 002 (revisited day 005 and 008)`, which STYLE.md's
