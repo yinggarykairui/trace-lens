@@ -288,12 +288,16 @@ taken against the built `docs/`, driven headlessly.
 - [x] **D6.** `source` 41.5 × 20.4 → **49.5 × 45.4 px** (padded, then
       pulled back by equal negative margins, so the header grew by
       nothing on its own account); speed buttons
-      40.7 → **54 × 44 px**, and only at 480 px and below — the floor was
+      40.7 → **44 × 44 px** (`min-width: 44px`; only the `0.5×` chip is
+      wider, at 54 × 44, because its label is), and only at 480 px and
+      below — the floor was
       written inside the phone-width query, so every wider viewport kept
       33.7 px whether or not a thumb was doing the pointing. It follows
       the input device now: **44 px under `(pointer: coarse)` at any
-      width** (`.btn` 74 × 44, `.btn-speed` 54 × 44, `.tool-head`
-      766 × 44 at 812 × 375; 74 / 54 / 722 × 44 at 768 × 1024), and
+      width** (`.btn` 74 × 44, `.btn-speed` 44 × 44 for `1×`, `2×` and
+      `4×` and 54 × 44 for `0.5×`, `.tool-head`
+      766 × 44 at 812 × 375; the same four chip widths at 768 × 1024,
+      with 74 / 722 × 44 either side of them), and
       unchanged for a fine pointer (33.7 / 33.7 / 34.6 px at 1100 × 700,
       which is the metric the committed screenshot shows).
       `scrollWidth === clientWidth` at 320 and 375 px. The header numbers
