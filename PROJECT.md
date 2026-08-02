@@ -458,6 +458,173 @@ Feature freeze held: no `src/` file was opened this cycle.
       hashes are unchanged; the committed `docs/` is byte-identical to a
       fresh build from `git archive HEAD`.
 
+Evening polish (day 008, the 20:00 PT shift — MANUAL §11 evening mandate).
+Two critic→fix cycles on the already-shipped increment 3 under feature
+freeze: no new scope, no fence item moved, 24 commits. Cycle 1 worked a
+merged list from a playtester and three critics (three BLOCK). Cycle 2
+re-graded with three fresh-context reviewers — correctness APPROVE,
+hygiene APPROVE, **ux BLOCK** — and the block was on cycle 1's own work.
+
+**Cycle 1 — ten defects, nine closed, one declined.**
+
+- [x] The README claimed Back past the first `#t=` entry keeps the address
+      bar and the replay "in agreement". It does not: a bare `''` hash has
+      no usable `t`, so it is ignored by design. The clause is gone and the
+      sentence says what Back actually does (`8a3baab`).
+- [x] Space hijacked activation. The window handler called
+      `preventDefault()` whatever had focus, so Space on Restart, on a
+      speed chip or on a card head started the clock instead of pressing
+      the control — the wrong action, silently. Buttons now keep their own
+      Space (`d59fafe`).
+- [x] The 44 px touch floor lived inside `@media (max-width: 480px)`, so
+      every wider viewport served 33.7 px targets to a device with no
+      mouse on it, a phone in landscape included. It follows the pointer
+      now (`d9a40be`).
+- [x] Right-click and middle-click on the lane seeked the replay and
+      published the moment while Chrome opened its context menu
+      (`31c5f4a`); `setPointerCapture` was the last unguarded DOM call in
+      the build and threw for an unknown pointer id, taking the seek down
+      with it — guarded, so a lost capture costs the drag and not the
+      click (`a9bc4ac`).
+- [x] `.transcript` and `.tool-body pre` become tab stops when they
+      overflow and wore Chrome's white ring while everything around them
+      wore the app's amber. Same ring as the rest of the app, inset
+      because both panes clip (`5a327a0`).
+- [x] `aria-valuenow` could never reach `aria-valuemax`: the raw max is
+      47.713 s and `valuenow` tops out at 47.7, so `End` announced 99.98%
+      of the run. `valuemax` is rounded the same way (`5d37eb2`).
+- [x] The share link was measurably lossy. The hash carried tenths,
+      floored, and text arrives in chunks closer together than 99 ms: over
+      25 random scrubs, 2 reloads came back a word-chunk short. It
+      publishes hundredths now, worst case 9 ms, 25/25 byte-equal
+      (`62fd5fe`). Records updated with it (`5b23f1a`, `2d7f2b0`,
+      `326e80d`, `1f9226d`).
+- [ ] **The focus-ring fix, `f4a1aca` — and it was wrong.** See below.
+
+**Cycle 2 — and the honest headline is that cycle 1's focus-ring fix was
+wrong, so cycle 2 reverted most of it.**
+
+`f4a1aca` was built to a defect list that asserted two things measurement
+does not support, and the fixer did not check either before building.
+
+- [x] It added `box-shadow: 0 0 0 2px var(--bg)` to `.btn:focus-visible`
+      with a comment claiming the shadow put `--bg` *inside* the ring for
+      the amber. A positive-spread `box-shadow` paints **outward from the
+      border box**, so with `outline-offset: 2px` it filled the gap
+      between the control and its ring — the inside — and `--bg` is
+      byte-identical to the page behind it. On the six controls and the
+      source link it was a literal no-op: an A/B of the unfocused render,
+      with and without, differs by **0 pixels**. Where it did land, on the
+      speed-chip seam, it added a dark stripe on the wrong side of the
+      ring and left the ring itself running straight into the selected
+      chip's fill — **1.00:1 at the ring's outer boundary, unchanged**,
+      the ring reading as an open-sided "C". Reverted (`531bbce`).
+- [x] It swapped the roles on `.timeline:focus-visible` (dark `outline` at
+      `-2px`, amber via `box-shadow`) to break up a "9 px amber slab"
+      where the ring's bottom met the progress rail. **That slab never
+      existed** — measured on the pre-swap build at `#t=47.71`, reading
+      inward from the ring: `#e3b34c` 2 · `#101216` 2 · `#5c657a` 1 ·
+      `#e3b34c` 3.75, three pixels of non-amber already between them. The
+      swap cost two things instead, because a −2 px outline paints over
+      the element's own border and a pixel of the canvas bitmap: the
+      lane's 1 px `#5c657a` border was **not drawn at all** while the lane
+      had focus, and the rail measured 2.75 px focused against 3.75 px
+      unfocused. Reverted to the plain amber outline the rest of the app
+      uses (`1ba91c0`); the false comment went with it.
+- [x] **Kept from cycle 1:** `.btn-speed.is-active:focus-visible`'s dark
+      moat. That case — the selected chip focused *itself* — is the one
+      the original defect was really about, it measures 9.66:1, and it
+      reads as a solid pill inside a thin ring.
+- [x] **The seam cycle 1 never closed.** The chips overlap by 1 px and one
+      of the four is always amber, so a focused chip's ring is painted
+      *inside* its neighbour. The dark edge has to be on the ring's outer
+      boundary, which a shadow spread past the outline's outer edge does:
+      `.btn-speed:focus-visible` takes `0 0 0 6px var(--bg)` and the
+      outline paints the amber back over the middle of it, leaving 2 px of
+      `--bg` on both sides. At 1440 × 900, 1× selected and 0.5× focused,
+      reading outward: `#171a20` 5 · `#262b34` 1 · `#101216` 2 ·
+      `#e3b34c` 2 · `#101216` 2 · `#e3b34c` 6.5, against
+      `#101216` 2 · `#e3b34c` 10.5 before. The mirror case reads the same.
+      It costs the selected neighbour 6 px of a 40.7 px fill and buys back
+      one focus language: **two ring geometries, not four** — outset at
+      `outline-offset: 2px`, inset at `-2px` where the box clips
+      (`f18d3a4`).
+- [x] Space was stolen from the two panes cycle 1 had just promoted to tab
+      stops: the new exception list covered buttons only, so Space toggled
+      the replay while every other scroll key paged the pane (at 500 × 300
+      on `#t=8`, PageDown 0 → 82, ArrowDown 0 → 40, End 0 → 206, Space
+      0 → 0). The panes are in the list now and Space pages them natively
+      (`6652d08`).
+- [x] Two README sentences. "Space bar toggles play/pause" is conditional
+      since `d59fafe`, and now qualified (`c94e90a`). The provenance
+      footer read `Day 002 (revisited day 005 and 008)`, which STYLE.md's
+      verbatim rule does not allow and which points a reader at a
+      dashboard one-liner written before deep-links, the keyboard and the
+      legend existed; it is `Day 008` (`efef539`).
+- [x] Nine documents stated numbers the build no longer had — three source
+      comments still describing the hash as tenths (`9093697`), an
+      increment-3 §8 line the Open threads section directly contradicted
+      (`402c447`), D6's header measurement, which `326e80d` rewrote the
+      same night without re-measuring after D3 moved it, and D4's focus
+      stops (`e6357de`), and the `End` thread's `#t=47.7` literals plus
+      the rationale for leaving that thread open (`ccedad3`).
+- [x] Verified after every change against the built `docs/` served on a
+      port checked free before binding, with the served `index.html` and
+      both assets asserted byte-identical to the committed ones before
+      each measurement. Resting fine-pointer render **0 differing pixels**
+      against `1f9226d` at 1440 × 900, 1100 × 700, 375 × 667 and
+      320 × 568 on three deep-linked moments each; `screenshot.png`
+      untouched.
+
+**Open threads this shift knowingly leaves.** Consolidated from the three
+"Named by cycle N" lists above and the two evening cycles; the entries
+there stand, this is the de-duplicated ship-facing set.
+
+- The legend's 10 px swatch is wider than three of the five bars it names
+  (`read_file` 3 + 3 px, `edit_file` 5 px, against `run_tests` 42 + 40 px
+  on an 818 px lane). The fix is a minimum bar width in `draw()`, which
+  changes what the timeline claims about durations.
+- The transcript is ~66% empty at 1440 × 900, and the `.pane-hint` never
+  renders on an autoplay load. Both want the bottom-anchored-console
+  layout, which is its own increment.
+- Keyboard seek and `#t=` have no on-screen surface — they live in the
+  canvas `aria-label` and the README. The honest fix is a caption near the
+  legend, and the spec freezes the hint copy.
+- `End` while playing clears the hash instead of publishing the moment.
+  Deliberate; see the cycle-2 thread above for the rationale.
+- Focus falls to `<body>` when a tool card unmounts under a scrub.
+- Opening an older card while playing scrolls it back out of view.
+- `.btn` fill measures 1.08:1 and its border 1.32:1 against the page. Left
+  alone deliberately: every mark in the lane is measured against the lane,
+  and raising these was declined as out of a polish cycle's scope.
+- `.transcript:focus-visible`'s inset ring paints over content scrolled
+  under it when the pane is pinned to the bottom: at 500 × 300 the topmost
+  partly-visible line's box starts 6.05 px above the ring's inner edge. The
+  ring has to be inset — the pane clips, so an outside ring would be cut off
+  at the header and the lane — so the fix is scroll padding, not a ring.
+- `.transcript` and `.tool-body pre` are only tab-reachable in narrow
+  windows, because Chrome focuses a scroller only when it has no focusable
+  descendants: the pane at ~812 × 375 before the first card appears, the
+  `pre` at ~481–640 px wide.
+- Space at a scroll pane's own end chains to the document, exactly as
+  PageDown, ArrowDown and End already did there. Not reachable in the
+  shipped build — `html`, `body` and `#root` are `height: 100%`, so the
+  document has never been scrollable — and measured only with a 4 000 px
+  spacer forced into the page.
+- `#t=0x10` seeks to 0:16, because `parseHashTime` is `Number()`-lenient.
+- `aria-valuenow` drops the decimal at whole seconds; React types the
+  attribute as `number` and the one-decimal string fails `tsc --noEmit`.
+  `aria-valuetext` already announces the full form.
+- The lane renders 3.1% vertically squashed (`height: 64` plus
+  `box-sizing: border-box` plus a 1 px border), so the 4 px rail measures
+  3.875 css px. The `.source-link` tap box overhangs `.header` by
+  0.125 px. Both cosmetic and pre-existing.
+- At 320 px both `read_file` paths truncate before they diverge, so the
+  two cards still read alike there; at 375 px they do not.
+- Verification debt, unchanged: no scheduled shift has ever loaded
+  `https://yinggarykairui.github.io/trace-lens/` — `github.io` is
+  unreachable from these sandboxes.
+
 ## Increment 3 spec (day 008 revisit — planner artifact)
 
 *Posted to `PROJECT.md` (repo) and `HANDOFF.md` (hub) rather than as an issue comment: the GitHub API plane is gated in this sandbox. Size s–m. Last ship: day 005 (increment 2) + the day-005 evening polish pass. §4 shape.*
