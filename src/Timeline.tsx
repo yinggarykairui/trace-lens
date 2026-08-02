@@ -260,6 +260,14 @@ export function Timeline({
         aria-valuetext={`${(vt / 1000).toFixed(1)} seconds of ${(duration / 1000).toFixed(1)}`}
         onKeyDown={onKeyDown}
         onPointerDown={(e) => {
+          // The primary button only. Without this a right-click seeks the
+          // replay and publishes the new moment while Chrome opens its context
+          // menu over a playhead the visitor never asked to move, and a middle
+          // click does the same silently. Touch and pen are unaffected: a
+          // finger or a pen tip reports button 0 and isPrimary, the same as the
+          // left mouse button; a second finger is not primary and is ignored,
+          // which is what the single-capture drag already assumed.
+          if (e.button !== 0 || !e.isPrimary) return;
           e.currentTarget.setPointerCapture(e.pointerId);
           seekFromPointer(e);
         }}
