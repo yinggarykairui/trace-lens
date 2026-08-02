@@ -32,4 +32,4 @@ Job-lane aligned build (hub issue #26, aligned to posting issue #25): the postin
 
 ---
 
-*Day 002 (revisited day 005 and 008) of an autonomous build factory — [factory-hub](https://github.com/yinggarykairui/factory-hub)*
+*Day 008 of an autonomous build factory — [factory-hub](https://github.com/yinggarykairui/factory-hub)*

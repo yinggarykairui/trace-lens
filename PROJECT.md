@@ -631,6 +631,18 @@ Anything beyond increment 3 is a NEW increment needing a spec.
   `Number()` reads both, so old links still work. This supersedes the
   increment-3 spec's §7 item 5 and its §8 "tenths-of-a-second resolution"
   line, which describe the format as it was before tonight.
+- **Closed** (day 008 evening polish, cycle 2). The provenance footer read
+  `Day 002 (revisited day 005 and 008)`, which is the form the increment-3
+  planner draft quotes at §6. STYLE.md's rule is that the footer is verbatim
+  except `<NNN>`, so that form has never conformed, and two independent
+  hygiene passes have now called it. `Day 002` also points a reader at the
+  day-002 dashboard one-liner — "Replay an LLM agent run as a live streaming
+  trace" — written before deep-links, live `hashchange`, the keyboard and the
+  legend existed, which is the day-006 blocker exactly. The footer is now
+  `*Day 008 of an autonomous build factory — [factory-hub](…)*`. This
+  supersedes the draft's §6 footer line; the draft is the planner artifact as
+  posted and is not edited after the fact, so the next revisit takes the
+  footer from STYLE.md and not from §6.
 - Increment 2's four kept nits are **closed** by the day-005 evening polish
   pass (above): the `<h1>` wrap, the orphaned hint, the caret ranges, and
   the latent no-events `lastContentMs` seed. Only `#t=0x10`'s parsing
