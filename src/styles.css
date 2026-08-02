@@ -511,3 +511,26 @@ body {
     font-size: 11.5px;
   }
 }
+
+/* ---- touch input, at any width ---- */
+
+/* A thumb is the same size on a tablet as it is on a phone, but the 44px floors
+   above are inside a width query, so every viewport wider than 480px served
+   33.7px targets to a device with no mouse on it — including a phone turned
+   sideways (812 x 375). The floor follows the pointer instead: same three
+   controls, same 44px, wherever the thing doing the pointing is coarse. The
+   fine-pointer metrics are deliberately left where they are; the committed
+   screenshot is a fine-pointer capture of them. */
+@media (pointer: coarse) {
+  .btn {
+    min-height: 44px;
+  }
+
+  .btn-speed {
+    min-width: 44px;
+  }
+
+  .tool-head {
+    min-height: 44px;
+  }
+}
