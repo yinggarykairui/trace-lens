@@ -351,22 +351,15 @@ body {
 }
 
 /* The lane answers arrow keys now, so it has to look focused when it is. The
-   ring stands 2px off the lane's own 1px border — drawn on top of it, it reads
-   as a thicker border rather than as focus — and neither an outline nor a
-   box-shadow sits in layout, so neither can widen the page at 375px.
-   The two roles are swapped here on purpose. The controls get their amber from
-   an outline and their dark inner edge from a box-shadow; on a canvas an inset
-   shadow is painted under the bitmap and never seen, while an outline is
-   painted over it. So the outline draws the dark edge inside the lane and the
-   shadow draws the amber outside it. Without that edge the ring's bottom run
-   and the amber progress rail — 4px along the lane's own bottom — met across
-   1px of lane border and read as one 9px amber slab at the end of the run. */
+   offset clears the lane's own 1px border — a ring drawn on top of it reads as
+   a thicker border rather than as focus — and an outline sits outside layout,
+   so it cannot widen the page at 375px. The ring stays outside the canvas: an
+   outline pulled inside is painted over the bitmap, which cost the lane its
+   own border and the bottom pixel of the progress rail for as long as the lane
+   had focus. */
 .timeline:focus-visible {
-  outline: 2px solid var(--bg);
-  outline-offset: -2px;
-  box-shadow:
-    0 0 0 2px var(--bg),
-    0 0 0 4px var(--accent);
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
 }
 
 /* A caption for the lane's colours, not a control. It wraps rather than
