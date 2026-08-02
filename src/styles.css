@@ -329,12 +329,22 @@ body {
 }
 
 /* The lane answers arrow keys now, so it has to look focused when it is. The
-   offset clears the lane's own 1px border — a ring drawn on top of it reads as
-   a thicker border rather than as focus — and an outline sits outside layout,
-   so it cannot widen the page at 375px. */
+   ring stands 2px off the lane's own 1px border — drawn on top of it, it reads
+   as a thicker border rather than as focus — and neither an outline nor a
+   box-shadow sits in layout, so neither can widen the page at 375px.
+   The two roles are swapped here on purpose. The controls get their amber from
+   an outline and their dark inner edge from a box-shadow; on a canvas an inset
+   shadow is painted under the bitmap and never seen, while an outline is
+   painted over it. So the outline draws the dark edge inside the lane and the
+   shadow draws the amber outside it. Without that edge the ring's bottom run
+   and the amber progress rail — 4px along the lane's own bottom — met across
+   1px of lane border and read as one 9px amber slab at the end of the run. */
 .timeline:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
+  outline: 2px solid var(--bg);
+  outline-offset: -2px;
+  box-shadow:
+    0 0 0 2px var(--bg),
+    0 0 0 4px var(--accent);
 }
 
 /* A caption for the lane's colours, not a control. It wraps rather than
@@ -402,6 +412,13 @@ body {
 .header .source-link:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
+  /* The ring's own inner edge, rather than whatever happens to be behind the
+     control. The amber ring alone is invisible against an amber surface, and
+     the app has two of those — the selected speed button's fill and the lane's
+     progress rail — so the ring carries a dark edge with it: amber outside for
+     the dark page, --bg inside for the amber. It fills exactly the 2px the
+     outline-offset opens, so nothing moves and nothing else changes colour. */
+  box-shadow: 0 0 0 2px var(--bg);
   /* the speed buttons overlap by 1px, so a focused one has to paint above its
      neighbour or half its ring is covered by the next button's background */
   position: relative;
@@ -441,6 +458,20 @@ body {
   background: var(--accent);
   border-color: var(--accent);
   position: relative;
+}
+
+/* The one control where "selected" and "focused" meet, and both were the same
+   amber: a 2px ring 2px outside a solid amber fill read as a double amber box.
+   Focused, the selected chip takes a dark edge of its own — its border and 2px
+   inside it — so the fill pulls away from the ring and the two amber shapes are
+   a thin outline and a solid pill separated by 5px of --bg. Selection still
+   reads: the fill and its dark label are untouched. Unfocused, nothing here
+   applies and the chip is exactly what it was. */
+.btn-speed.is-active:focus-visible {
+  border-color: var(--bg);
+  box-shadow:
+    0 0 0 2px var(--bg),
+    inset 0 0 0 2px var(--bg);
 }
 
 .time-readout {
