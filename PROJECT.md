@@ -470,7 +470,9 @@ merged list from a playtester and three critics (three BLOCK). Cycle 2
 re-graded with three fresh-context reviewers — correctness APPROVE,
 hygiene APPROVE, **ux BLOCK** — and the block was on cycle 1's own work.
 
-**Cycle 1 — ten defects, nine closed, one declined.**
+**Cycle 1 — ten defects, nine closed, one closed wrong and reverted by
+cycle 2.** Nothing was declined: the tenth (`f4a1aca`, the focus ring) was
+built and shipped, and cycle 2 took most of it back out — see below.
 
 - [x] The README claimed Back past the first `#t=` entry keeps the address
       bar and the replay "in agreement". It does not: a bare `''` hash has
