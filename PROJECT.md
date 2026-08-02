@@ -747,16 +747,23 @@ Two more, from defects the cycle did not close outright:
 The cycle-2 defect list marked this OPEN THREAD, and the fixer did not build
 it. In the list's own words:
 
-- **`End` while playing wipes the hash instead of publishing `#t=47.7`.** The
+- **`End` while playing wipes the hash instead of publishing `#t=47.71`.** The
   seek lands on `duration_ms`, the rAF loop's own end-stop fires, and the
   "ran out → `clearHash()`" branch swallows a user-chosen moment. Paused, the
-  same key writes `#t=47.7` correctly. Pre-existing (drag-to-far-right while
+  same key writes `#t=47.71` correctly. Pre-existing (drag-to-far-right while
   playing does it too), but newly reachable through a key the README now
   advertises. The end-stop's hash-clearing is deliberate — reloading after
   watching the demo through should replay it, not hand back a spent transcript
   — so the honest fix is to distinguish a user-chosen end from the run's own
   end, which is a behaviour change and wants its own spec. Spec §4.5's
   `End` → `Play` → `#t=0.0` is unaffected and still holds.
+  *(The two literals above read `#t=47.7` until the day-008 evening shift;
+  `62fd5fe` took the hash to hundredths and the build writes `#t=47.71`. The
+  behaviour is unchanged and the thread stays open. The rationale the shift
+  accepted for leaving it: the clock reaching its own end clears the hash so
+  that watching the demo through and reloading replays it rather than handing
+  back a spent transcript, and `End` lands the clock in that same end state —
+  telling the two apart is the behaviour change, not the clearing.)*
 
 One more, noticed while measuring D1 and left alone under the freeze:
 
