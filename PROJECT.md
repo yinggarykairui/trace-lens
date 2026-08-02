@@ -783,7 +783,7 @@ Relative to the sketch in PROJECT.md:
 2. **One clock.** vt lives in `usePlayback`'s ref + state and nowhere else. A hashchange and an arrow key move that clock; they do not start one.
 3. **The app never adds a history entry.** All writes go through `replaceState`; `location.hash = …` and `pushState` are forbidden. Item 3(c) measures `history.length`.
 4. **A received hash is authoritative until the user chooses a new moment.** Arrival never writes, and never lets an older pending write land on top of it.
-5. **The hash carries `t` only, at 0.1 s resolution, floored to match the readout.** Unchanged.
+5. **The hash carries `t` only, floored.** *(Corrected after the fact, like §8's twin line: the resolution this said was "0.1 s … unchanged" has been hundredths since `62fd5fe` — `formatHashTime` floors to hundredths and drops a trailing zero, so a moment landing on a tenth still publishes `#t=12.4` and only one needing the second digit spends it, `#t=5.93`. Worst case 9 ms behind the sharer, was 99 ms. The `t`-only rule and the flooring are unchanged; the resolution is not. This is the planner artifact as posted, so the correction is noted rather than the line rewritten.)*
 6. **Nothing in a draw effect or a listener may throw unguarded.** There is still no error boundary above the tree; a throw is a blank page. `roundRect` and `ResizeObserver` stay feature-detected.
 
 ---
