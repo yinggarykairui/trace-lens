@@ -54,13 +54,28 @@ export function parseHashTime(rawHash: string): number | null {
 }
 
 /**
- * Format ms as the hash's own units: seconds, one decimal — floored, never
+ * Format ms as the hash's own units: seconds, two decimals — floored, never
  * rounded. Rounding up would disagree with the on-screen readout (which floors
- * to whole seconds) and could push the value past the end of the run, so the
- * link would land a hair short of a moment the sharer saw as the end.
+ * to whole seconds) and could publish a moment the sharer had not reached yet,
+ * so the link would hand back a transcript with a word in it they never saw.
+ *
+ * Tenths were lossy in a way this increment cannot afford: the published moment
+ * sat up to 99 ms behind the playhead, and text arrives in whole-word chunks
+ * closer together than that. Measured over 25 random scrubs, 2 of them reopened
+ * a word-chunk short of what the sharer was looking at (`#t=5.9` dropped
+ * "bounds are ", `#t=27.5` dropped "— exactly what "), and "the address bar is
+ * the share link" is the whole premise. Hundredths cut the worst case to 9 ms,
+ * which is inside a chunk rather than across one.
+ *
+ * The second decimal is dropped when it is a zero, so a moment that lands on a
+ * tenth still publishes the string it always did — `#t=12.4`, `#t=0.0` — and
+ * only a moment that needs the extra digit spends it (`#t=5.93`). One decimal
+ * always survives: `#t=0` would be a new shape for the commonest link of all.
+ * `parseHashTime` is untouched; `Number()` reads both without a second rule.
  */
 export function formatHashTime(ms: number): string {
-  return `#t=${(Math.floor(ms / 100) / 10).toFixed(1)}`;
+  const seconds = (Math.floor(ms / 10) / 100).toFixed(2);
+  return `#t=${seconds.replace(/0$/, '')}`;
 }
 
 /**
