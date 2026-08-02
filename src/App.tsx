@@ -79,7 +79,7 @@ export default function App() {
 
   // Play pressed at the end restarts from 0, which moves the shared moment and
   // so must move the hash too: otherwise a scrub to the far right leaves its
-  // spent `#t=47.7` in the address bar while the run replays from the top, and
+  // spent `#t=47.71` in the address bar while the run replays from the top, and
   // reloading or sharing hands back a finished transcript. (The clock's own stop
   // at the end still writes nothing — see the pause effect below.)
   const onToggle = useCallback(() => {
