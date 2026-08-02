@@ -42,9 +42,13 @@ function toolsInTrace(trace: Trace): string[] {
   return seen;
 }
 
-// The lane's own surface. Kept a clear step above the page background so the
-// track's extent is visible even before anything is drawn into it; the bars and
-// the playhead carry their own contrast.
+// The lane's own surface. It is only 1.40:1 above the page background, so it is
+// not what shows where the track starts and stops before anything is drawn into
+// it — the lane's 1px CSS border does that, at 3.21:1 against the page. Do not
+// lighten this to make the extent read on its own: every mark in the lane is
+// measured against this fill, and all of them would lose exactly what it gained
+// (a past cycle tried a lighter surface for the played region and pushed the
+// turn dividers to 1.07:1). The bars and the playhead carry their own contrast.
 const LANE_FILL = '#2a2f39';
 
 // The app's accent, and the playhead's own colour. The progress rail is drawn
