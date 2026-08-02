@@ -255,7 +255,10 @@ export function Timeline({
         role="slider"
         aria-label="run timeline — click, drag, or seek with arrow keys; hold Shift for five seconds, Home and End for the ends of the run"
         aria-valuemin={0}
-        aria-valuemax={duration / 1000}
+        // Rounded the same way valuenow is, or the two can never meet: the raw
+        // max is 47.713 while valuenow tops out at 47.7, so End — the run's own
+        // end — was announced as 99.98% of the way through.
+        aria-valuemax={Number((duration / 1000).toFixed(1))}
         aria-valuenow={Number((vt / 1000).toFixed(1))}
         aria-valuetext={`${(vt / 1000).toFixed(1)} seconds of ${(duration / 1000).toFixed(1)}`}
         onKeyDown={onKeyDown}
