@@ -268,7 +268,19 @@ export function Timeline({
           // left mouse button; a second finger is not primary and is ignored,
           // which is what the single-capture drag already assumed.
           if (e.button !== 0 || !e.isPrimary) return;
-          e.currentTarget.setPointerCapture(e.pointerId);
+          // Guarded for the same reason as roundRect and ResizeObserver above:
+          // there is no error boundary over this tree. setPointerCapture throws
+          // NotFoundError for a pointerId the browser has no active pointer for
+          // — not reachable with a real mouse or finger, but it was the last
+          // unguarded DOM call in the build and it took the seek down with it.
+          // Capture is only what keeps a drag on the lane once the cursor
+          // leaves it, so losing it costs the drag, not the click.
+          try {
+            e.currentTarget.setPointerCapture(e.pointerId);
+          } catch {
+            // no capture: the click below still seeks, the drag just will not
+            // follow the pointer off the canvas
+          }
           seekFromPointer(e);
         }}
         onPointerMove={(e) => {
