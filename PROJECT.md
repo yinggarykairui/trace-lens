@@ -245,8 +245,9 @@ taken against the built `docs/`, driven headlessly.
       2× active with the run playing (`Pause`, `0:34 / 0:47`), the
       `edit_file` card expanded on its INPUT and OUTPUT, turn 3's line
       streaming behind the caret, the playhead 72.5% along the lane, and
-      the three-row legend under it. Captured last, so the image is of
-      the shipped build rather than of the one the cycle started with.
+      the legend's one row of three entries under it. Captured last, so
+      the image is of the shipped build rather than of the one the cycle
+      started with.
 - [x] **D2.** `#t=1e999` and `#t=-1e999` parsed to ±Infinity, failed the
       `Number.isFinite` gate and were treated as junk, so the app played
       from 0:00 where the README promises a clamp. Only `NaN` is junk
@@ -362,8 +363,8 @@ four closed, nothing added, nothing declined.
       at the same 2200 × 1400 framing and the same moment as the image it
       replaces (2× active, `Pause`, `0:34 / 0:47`, `edit_file` expanded on
       INPUT and OUTPUT, turn 3 streaming behind a visible caret, the
-      three-row legend, playhead at 72.4%). The lane in it is now the lane
-      the build draws.
+      legend of three entries in one row, playhead at 72.4%). The lane in
+      it is now the lane the build draws.
 - [x] Re-verified on the built artifact after all four: the live `#t=31.5`
       path at 4× (paused, `0:31`, hash byte-identical, playhead 1.48 px
       off), seven junk hashes ignored with `#root` intact, `-3` / `9999` /
@@ -401,8 +402,8 @@ Feature freeze held: no `src/` file was opened this cycle.
       caption's shape and STYLE.md's 2–5 sentence slot (5) unchanged.
       `screenshot.png` deliberately **not** re-captured: the image does
       not depict granularity, and cycle 3 verified it against this build
-      (2× active, expanded `edit_file` card, three-row legend, the 4 px
-      amber rail, playhead at 72.8%).
+      (2× active, expanded `edit_file` card, one legend row of three
+      entries, the 4 px amber rail, playhead at 72.8%).
 - [x] **D2. `index.html` still shipped the phrase the same commit ruled
       untrue.** `description` and `og:description` both carried
       "token-by-token text", and both ship inside `docs/index.html` — it
@@ -431,7 +432,7 @@ Feature freeze held: no `src/` file was opened this cycle.
       byte-identical to the committed one, the served bundle is the
       committed `index-BqEPnbYl.js`, both metadata strings carry the
       corrected sentence, the page renders (`#root` populated, three
-      legend rows, transcript streaming), a live `#t=31.5` still lands
+      legend entries, transcript streaming), a live `#t=31.5` still lands
       and is not rewritten, and console errors, page errors and failed
       requests are all zero. `npm run build` clean including
       `tsc --noEmit`; the rebuild moved `docs/index.html` only, the asset
@@ -520,7 +521,7 @@ Every item is drivable by a stranger in a headless browser against the built art
 
 5. **One clock, one projection — the invariant holds under keys.** Keyboard-seek to 31.0 s while paused and capture the transcript pane's `textContent`; reload the built page at `#t=31.0` and capture again — the two strings are **identical**. Separately, with the run playing at 2×, press `→` once: the run keeps playing (no pause), and 1 000 ms later the readout has advanced by 2.0 s ± 0.2 s from the seeked value — one accumulator, not two. `End` then `Play` still restarts from 0:00 and republishes `#t=0.0` (the 1 049 ms silent tail behaviour from increment 2 is unbroken).
 
-6. **The legend tells the truth about the pixels.** Exactly three rows under the lane — `read_file`, `run_tests`, `edit_file` — in trace order. For each, the swatch's computed background colour equals the colour sampled from that tool's bar in the canvas (`#6d94c9`, `#a488c9`, `#c9995f`), compared as RGB triples. The row set is derived from the trace: with a tool's `tool_call` events removed from a scratch copy of `trace.json`, its row disappears (no hardcoded names anywhere outside the shared colour map). At 375 px, `document.documentElement.scrollWidth === clientWidth` (no horizontal scroll) and the legend block's height is ≤ 44 px.
+6. **The legend tells the truth about the pixels.** Exactly three entries under the lane — `read_file`, `run_tests`, `edit_file` — in trace order. ("Rows" as this spec first wrote it was wrong about what shipped and what the screenshot shows: the DOM is one flex row of three `<li>`, 18.59 px tall at 320 / 375 / 1100 / 1280 px. It wraps to more rows only if a width forces it, and none of those four does.) For each, the swatch's computed background colour equals the colour sampled from that tool's bar in the canvas (`#6d94c9`, `#a488c9`, `#c9995f`), compared as RGB triples. The entry set is derived from the trace: with a tool's `tool_call` events removed from a scratch copy of `trace.json`, its entry disappears (no hardcoded names anywhere outside the shared colour map). At 375 px, `document.documentElement.scrollWidth === clientWidth` (no horizontal scroll) and the legend block's height is ≤ 44 px.
 
 7. **Nothing from increments 1–2 regressed, and the artifact is the source.** `npm run build` clean (including `tsc --noEmit`); the committed `docs/` is byte-identical to a fresh build from `git archive HEAD`; load-time `#t=` deep link, pause/scrub publishing via `replaceState`, Space toggle, 0.5–4× speeds, Restart, drag-scrub landing within **7 ms** of the playhead pixel, card expand state surviving a back-scrub past the card's birth, pinned-to-bottom autoscroll surviving a card toggle, and 375 px with no horizontal scroll all still hold. README sentences in §6 are all true of the built artifact; `screenshot.png` re-captured from this build.
 
@@ -727,12 +728,17 @@ The cycle-3 defect list marked these OPEN THREAD: they are not defects the
 fixer may close under feature freeze, and none of them was built. In the
 list's own words, with its measurements:
 
-- **The legend's 10 px swatch is wider than two of the three bars it names.**
-  At 818 px, `read_file` renders 4 px, `edit_file` 5 px, `run_tests` 44 px.
-  The fix is a minimum bar width in `draw()`, which changes what the timeline
-  claims about durations — its own increment. Already recorded by cycle 1
-  ("the legend names bars the eye cannot find", measured 6 / 5 / 82 px on the
-  same 818 px lane); kept, and now named by two cycles.
+- **The legend's 10 px swatch is wider than the bars it names.** At 818 px,
+  `read_file` renders 4 px, `edit_file` 5 px, `run_tests` 44 px. Those are
+  **per-bar** widths, and the trace draws five bars: two `read_file`, two
+  `run_tests`, one `edit_file`. Cycle 1's "6 / 5 / 82 px on the same 818 px
+  lane" ("the legend names bars the eye cannot find") is the **total** width
+  each tool's colour occupies across its bars, so the two records measure
+  different things and agree. Sampled again from the canvas bitmap at 818 px
+  (dpr 1, solid colour only, antialiased edges excluded): `read_file`
+  3 + 3 = 6 px, `edit_file` 5 px, `run_tests` 42 + 40 = 82 px. The fix is a
+  minimum bar width in `draw()`, which changes what the timeline claims about
+  durations — its own increment; kept, and now named by two cycles.
 - **The lane renders 3.1 % vertically squashed.** `height:64` plus
   `box-sizing:border-box` plus a 1 px border gives a 62 px content box for a
   64-unit bitmap, so the new progress rail measures 3.875 css px rather than 4.
