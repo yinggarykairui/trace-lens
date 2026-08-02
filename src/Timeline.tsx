@@ -6,7 +6,7 @@ const PAD = 8; // px inside the canvas on each side
 const HEIGHT = 64; // css px
 
 // Keyboard seek steps. One second is the smallest move worth making on a 47 s
-// run; five is a turn's worth. Both are coarser than the hash's own 0.1 s, so
+// run; five is a turn's worth. Both are coarser than the hash's own 0.01 s, so
 // every keyed moment is a moment the address bar can carry exactly.
 const KEY_STEP_MS = 1000;
 const KEY_STEP_SHIFT_MS = 5000;

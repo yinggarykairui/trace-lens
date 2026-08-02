@@ -2,7 +2,10 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 
 /**
  * How close to the end of the run counts as "at the end". Below one tenth of a
- * second nothing more can be seen, and that is also the hash's resolution.
+ * second nothing more can be seen. The hash used to stop there too; it carries
+ * hundredths since 62fd5fe, so this is the visible floor and nothing else. It
+ * does not bind on this trace anyway — App.tsx sizes the tail from the events
+ * (`max(100, 47713 - 46664)` = 1049 ms).
  */
 export const END_SLACK_MS = 100;
 
