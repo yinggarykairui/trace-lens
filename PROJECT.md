@@ -315,7 +315,7 @@ taken against the built `docs/`, driven headlessly.
       this line carried — 44.3 px at 375 px, 48.3 px at 1100 px — were
       measured before cycle 2's own D3, which bought the source link's
       ring six pixels of `padding-top` (`PROJECT.md` D3, twenty lines
-      below) and was landed the same night. `326e80d` rewrote this line
+      below) and was landed the same night. `575f744` rewrote this line
       afterwards and left them standing. Measured on the built `docs/`:
       **50.25 px at 320 and 375 px, 54.25 px at 1100 px** (also 54.25 at
       1440), `padding-top` 16 px and 20 px.
@@ -342,7 +342,7 @@ thing: a regression cycle 1 itself introduced. Four defects on the list,
 four closed, nothing added, nothing declined.
 
 - [x] **D1, the unanimous blocker, and a regression of cycle 1's own
-      `69721a7`.** That commit bought the played region 3.16:1 against the
+      `b946ca1`.** That commit bought the played region 3.16:1 against the
       unplayed track by making it a full-height lighter surface, and paid
       for it out of every mark drawn on that surface: inside the played
       region `read_file` 4.30 → 1.36, `run_tests` 4.44 → 1.40, `edit_file`
@@ -362,7 +362,7 @@ four closed, nothing added, nothing declined.
       and **every mark is back on `LANE_FILL`** — 4.30 / 4.44 / 5.25 /
       6.52 / 6.19 / 2.47 / 1.21 sampled, against 3.84 / 3.98 / 4.68 / 5.71
       / 5.42 / 2.33 / 1.21 for the same probe on a fresh build of
-      `69721a7^`. No mark is below where it stood before either cycle-1
+      `b946ca1^`. No mark is below where it stood before either cycle-1
       state; five are above. (The three alpha strokes sample under their
       composited-hex values because a 1 px stroke at a fractional x is
       antialiased across two columns — the same probe reads the same way on
@@ -374,7 +374,7 @@ four closed, nothing added, nothing declined.
       streams in six windows, `edit_file` is not born until 31.283 s), i.e.
       72–75%, so at two-thirds nothing is streaming. Now "three-quarters",
       and the re-captured image measures 72.4% off the PNG.
-- [x] **D3.** Cycle 1's `bb02f93` gave the `source` link a 49.5 × 45.4 px
+- [x] **D3.** Cycle 1's `ade0bc4` gave the `source` link a 49.5 × 45.4 px
       target by padding a 20 px word, which put its box at `top: -1px` at
       320 and 375 px (3 px at 1100 px) — so its focus ring, drawn 2 px
       outside the box, landed at −3 px and the viewport cut its top edge
@@ -391,7 +391,7 @@ four closed, nothing added, nothing declined.
       opener said "token-by-token"; the trace's deltas are 1–4-word
       chunks. The opener became "delta-by-delta", which is what
       *What it does* has said since day 005, and STYLE.md makes the opener
-      the repo description, so that much mattered. But `1863456` changed
+      the repo description, so that much mattered. But `a8332da` changed
       only that line: the same sentence ships verbatim in `index.html`'s
       `description` and `og:description` (and so in `docs/index.html`),
       and this file's own increment-1 spec line carried it too — the
@@ -426,7 +426,7 @@ done-map. Three defects, three closed, nothing added, nothing declined.
 Feature freeze held: no `src/` file was opened this cycle.
 
 - [x] **D1. The README overstated the streaming granularity in the two
-      places `1863456` left standing.** The caption said the fix "streams
+      places `a8332da` left standing.** The caption said the fix "streams
       into the text pane word by word" and *What it does* said a seek
       lands "even mid-word". Neither is reachable: `project.ts` appends
       only whole deltas (`if (ev.t + d.dt <= vt) text += d.s`), and of the
@@ -459,7 +459,7 @@ Feature freeze held: no `src/` file was opened this cycle.
       draft is the planner artifact as posted and is not edited after the
       fact — it is where both phrases came from, and the shipped README
       now departs from it in three places: the two named above, plus the
-      caption's "two-thirds" → "three-quarters" (cycle 2's D2, `ea9e501`).
+      caption's "two-thirds" → "three-quarters" (cycle 2's D2, `a59a5ab`).
 - [x] **D3. This done-map checked off a defect that was only half
       closed.** Cycle 2's D4 box is unticked and now says what actually
       happened — one of four places closed, three left standing, and the
@@ -486,47 +486,47 @@ re-graded with three fresh-context reviewers — correctness APPROVE,
 hygiene APPROVE, **ux BLOCK** — and the block was on cycle 1's own work.
 
 **Cycle 1 — ten defects, nine closed, one closed wrong and reverted by
-cycle 2.** Nothing was declined: the tenth (`f4a1aca`, the focus ring) was
+cycle 2.** Nothing was declined: the tenth (`a4d6719`, the focus ring) was
 built and shipped, and cycle 2 took most of it back out — see below.
 
 - [x] The README claimed Back past the first `#t=` entry keeps the address
       bar and the replay "in agreement". It does not: a bare `''` hash has
       no usable `t`, so it is ignored by design. The clause is gone and the
-      sentence says what Back actually does (`8a3baab`).
+      sentence says what Back actually does (`c1d86fc`).
 - [x] Space hijacked activation. The window handler called
       `preventDefault()` whatever had focus, so Space on Restart, on a
       speed chip or on a card head started the clock instead of pressing
       the control — the wrong action, silently. Buttons now keep their own
-      Space (`d59fafe`).
+      Space (`386ee9a`).
 - [x] The 44 px touch floor lived inside `@media (max-width: 480px)`, so
       every wider viewport served 33.7 px targets to a device with no
       mouse on it, a phone in landscape included. It follows the pointer
-      now (`d9a40be`).
+      now (`9a5c2ba`).
 - [x] Right-click and middle-click on the lane seeked the replay and
       published the moment while Chrome opened its context menu
-      (`31c5f4a`); `setPointerCapture` was the last unguarded DOM call in
+      (`fd98c51`); `setPointerCapture` was the last unguarded DOM call in
       the build and threw for an unknown pointer id, taking the seek down
       with it — guarded, so a lost capture costs the drag and not the
-      click (`a9bc4ac`).
+      click (`d54a436`).
 - [x] `.transcript` and `.tool-body pre` become tab stops when they
       overflow and wore Chrome's white ring while everything around them
       wore the app's amber. Same ring as the rest of the app, inset
-      because both panes clip (`5a327a0`).
+      because both panes clip (`f0ab1cc`).
 - [x] `aria-valuenow` could never reach `aria-valuemax`: the raw max is
       47.713 s and `valuenow` tops out at 47.7, so `End` announced 99.98%
-      of the run. `valuemax` is rounded the same way (`5d37eb2`).
+      of the run. `valuemax` is rounded the same way (`9ab3b86`).
 - [x] The share link was measurably lossy. The hash carried tenths,
       floored, and text arrives in chunks closer together than 99 ms: over
       25 random scrubs, 2 reloads came back a word-chunk short. It
       publishes hundredths now, worst case 9 ms, 25/25 byte-equal
-      (`62fd5fe`). Records updated with it (`5b23f1a`, `2d7f2b0`,
-      `326e80d`, `1f9226d`).
-- [ ] **The focus-ring fix, `f4a1aca` — and it was wrong.** See below.
+      (`590e7da`). Records updated with it (`199670d`, `8c20a5e`,
+      `575f744`, `2063b2a`).
+- [ ] **The focus-ring fix, `a4d6719` — and it was wrong.** See below.
 
 **Cycle 2 — and the honest headline is that cycle 1's focus-ring fix was
 wrong, so cycle 2 reverted most of it.**
 
-`f4a1aca` was built to a defect list that asserted two things measurement
+`a4d6719` was built to a defect list that asserted two things measurement
 does not support, and the fixer did not check either before building.
 
 - [x] It added `box-shadow: 0 0 0 2px var(--bg)` to `.btn:focus-visible`
@@ -540,7 +540,7 @@ does not support, and the fixer did not check either before building.
       speed-chip seam, it added a dark stripe on the wrong side of the
       ring and left the ring itself running straight into the selected
       chip's fill — **1.00:1 at the ring's outer boundary, unchanged**,
-      the ring reading as an open-sided "C". Reverted (`531bbce`).
+      the ring reading as an open-sided "C". Reverted (`7630f79`).
 - [x] It swapped the roles on `.timeline:focus-visible` (dark `outline` at
       `-2px`, amber via `box-shadow`) to break up a "9 px amber slab"
       where the ring's bottom met the progress rail. **That slab never
@@ -552,7 +552,7 @@ does not support, and the fixer did not check either before building.
       lane's 1 px `#5c657a` border was **not drawn at all** while the lane
       had focus, and the rail measured 2.75 px focused against 3.75 px
       unfocused. Reverted to the plain amber outline the rest of the app
-      uses (`1ba91c0`); the false comment went with it.
+      uses (`5047514`); the false comment went with it.
 - [x] **Kept from cycle 1:** `.btn-speed.is-active:focus-visible`'s dark
       moat. That case — the selected chip focused *itself* — is the one
       the original defect was really about, it measures 9.66:1, and it
@@ -570,35 +570,35 @@ does not support, and the fixer did not check either before building.
       It costs the selected neighbour 6 px of a 40.7 px fill and buys back
       one focus language: **two ring geometries, not four** — outset at
       `outline-offset: 2px`, inset at `-2px` where the box clips
-      (`f18d3a4`).
+      (`a4008f1`).
 - [x] Space was stolen from the two panes cycle 1 had just promoted to tab
       stops: the new exception list covered buttons only, so Space toggled
       the replay while every other scroll key paged the pane (at 500 × 300
       on `#t=8`, PageDown 0 → 82, ArrowDown 0 → 40, End 0 → 159, Space
       0 → 0). The panes are in the list now and Space pages them natively
-      (`6652d08`). The `End` figure read 206 until this pass: 159 is the
+      (`1f36856`). The `End` figure read 206 until this pass: 159 is the
       pane's whole scroll range there (`scrollHeight 253 −
       clientHeight 94`), so 206 was never reachable. Re-measured on both the
       pre-fix build and HEAD; `src/App.tsx`'s own comment has said 159 since
-      `6652d08`.
+      `1f36856`.
 - [x] Two README sentences. "Space bar toggles play/pause" is conditional
-      since `d59fafe`, and now qualified (`c94e90a`). The provenance
+      since `386ee9a`, and now qualified (`6b12b0c`). The provenance
       footer read `Day 002 (revisited day 005 and 008)`, which STYLE.md's
       verbatim rule does not allow and which points a reader at a
       dashboard one-liner written before deep-links, the keyboard and the
-      legend existed; it is `Day 008` (`efef539`).
+      legend existed; it is `Day 008` (`9a43853`).
 - [x] Nine documents stated numbers the build no longer had — three source
-      comments still describing the hash as tenths (`9093697`), an
+      comments still describing the hash as tenths (`79b7c7d`), an
       increment-3 §8 line the Open threads section directly contradicted
-      (`402c447`), D6's header measurement, which `326e80d` rewrote the
+      (`4fc5175`), D6's header measurement, which `575f744` rewrote the
       same night without re-measuring after D3 moved it, and D4's focus
-      stops (`e6357de`), and the `End` thread's `#t=47.7` literals plus
-      the rationale for leaving that thread open (`ccedad3`).
+      stops (`851ec2a`), and the `End` thread's `#t=47.7` literals plus
+      the rationale for leaving that thread open (`d3ba02d`).
 - [x] Verified after every change against the built `docs/` served on a
       port checked free before binding, with the served `index.html` and
       both assets asserted byte-identical to the committed ones before
       each measurement. Resting fine-pointer render **0 differing pixels**
-      against `1f9226d` at 1440 × 900, 1100 × 700, 375 × 667 and
+      against `2063b2a` at 1440 × 900, 1100 × 700, 375 × 667 and
       320 × 568 on three deep-linked moments each; `screenshot.png`
       untouched.
 
@@ -827,7 +827,7 @@ Relative to the sketch in PROJECT.md:
 2. **One clock.** vt lives in `usePlayback`'s ref + state and nowhere else. A hashchange and an arrow key move that clock; they do not start one.
 3. **The app never adds a history entry.** All writes go through `replaceState`; `location.hash = …` and `pushState` are forbidden. Item 3(c) measures `history.length`.
 4. **A received hash is authoritative until the user chooses a new moment.** Arrival never writes, and never lets an older pending write land on top of it.
-5. **The hash carries `t` only, floored.** *(Corrected after the fact, like §8's twin line: the resolution this said was "0.1 s … unchanged" has been hundredths since `62fd5fe` — `formatHashTime` floors to hundredths and drops a trailing zero, so a moment landing on a tenth still publishes `#t=12.4` and only one needing the second digit spends it, `#t=5.93`. Worst case 9 ms behind the sharer, was 99 ms. The `t`-only rule and the flooring are unchanged; the resolution is not. This is the planner artifact as posted, so the correction is noted rather than the line rewritten.)*
+5. **The hash carries `t` only, floored.** *(Corrected after the fact, like §8's twin line: the resolution this said was "0.1 s … unchanged" has been hundredths since `590e7da` — `formatHashTime` floors to hundredths and drops a trailing zero, so a moment landing on a tenth still publishes `#t=12.4` and only one needing the second digit spends it, `#t=5.93`. Worst case 9 ms behind the sharer, was 99 ms. The `t`-only rule and the flooring are unchanged; the resolution is not. This is the planner artifact as posted, so the correction is noted rather than the line rewritten.)*
 6. **Nothing in a draw effect or a listener may throw unguarded.** There is still no error boundary above the tree; a throw is a blank page. `roundRect` and `ResizeObserver` stay feature-detected.
 
 ---
@@ -836,7 +836,7 @@ Relative to the sketch in PROJECT.md:
 
 - **Desktop dead space** (~700 px at 1440 × 900 at load, 139 px above the timeline mid-run). The honest fix is bottom-anchoring the transcript so it fills upward like a console. Still its own increment; explicitly not this one.
 - **Fence items still closed and still the likeliest next moves:** second bundled trace (a contrast run) · reduced-motion mode. Copy-link/share UI stays closed — this increment is the argument that it is unnecessary.
-- **Deliberate and unchanged:** the hash mirrors the last paused/scrubbed moment, not the live playhead · `#t=0x10` seeks to 16 s because `parseHashTime` is `Number()`-lenient (harmless). *(The "tenths-of-a-second resolution, so a reopened link can sit up to 99 ms behind the sharer" item that stood here is closed by `62fd5fe`: the hash publishes hundredths and the worst case is 9 ms. See the Open threads note below, which this line used to contradict.)*
+- **Deliberate and unchanged:** the hash mirrors the last paused/scrubbed moment, not the live playhead · `#t=0x10` seeks to 16 s because `parseHashTime` is `Number()`-lenient (harmless). *(The "tenths-of-a-second resolution, so a reopened link can sit up to 99 ms behind the sharer" item that stood here is closed by `590e7da`: the hash publishes hundredths and the worst case is 9 ms. See the Open threads note below, which this line used to contradict.)*
 - **New, deliberate, to be disclosed in the sign-off:** a junk `hashchange` leaves the address bar disagreeing with the app — we ignore it rather than reset the viewer's position or clobber what they typed. Revisit only if it confuses a real recipient.
 - **Not specced, and priced for later:** announcing the seeked moment to a screen reader (needs a live region, and `role="slider"`'s value attributes are the cheaper first move) · a time readout or tooltip on the lane itself · keyboard access to the tool cards beyond the Tab order they already have.
 - **Verification debt, unchanged:** no scheduled shift has ever loaded `https://yinggarykairui.github.io/trace-lens/` — `github.io` is unreachable from these sandboxes, so §11.2's live-demo line and the repo description/topics check still fall to a desk session. What is verifiable here, and must be re-verified at ship, is that the committed `docs/` is byte-identical to a fresh build of `HEAD`.
@@ -950,7 +950,7 @@ defect list's own words:
 - **Back past the first `#t=` lands on a bare `''` hash**, which has no usable
   `t` and is therefore ignored, so the address bar and the replay disagree.
   Deliberate under the spec's junk rule; worth a sentence in the sign-off. The
-  half of this that was a truth defect is closed: `8a3baab` deleted the
+  half of this that was a truth defect is closed: `c1d86fc` deleted the
   README's "stay in agreement" clause and said what Back actually does, so
   `grep "stay in agreement" README.md` returns 0 hits. The behaviour stays.
 - **Expanding all five cards at the end leaves 129 px below the fold**
@@ -994,7 +994,7 @@ it. In the list's own words:
   end, which is a behaviour change and wants its own spec. Spec §4.5's
   `End` → `Play` → `#t=0.0` is unaffected and still holds.
   *(The two literals above read `#t=47.7` until the day-008 evening shift;
-  `62fd5fe` took the hash to hundredths and the build writes `#t=47.71`. The
+  `590e7da` took the hash to hundredths and the build writes `#t=47.71`. The
   behaviour is unchanged and the thread stays open. The rationale the shift
   accepted for leaving it: the clock reaching its own end clears the hash so
   that watching the demo through and reloading replays it rather than handing
@@ -1041,5 +1041,5 @@ list's own words, with its measurements:
   bare hash** — `#t=30.0` → Back → readout `0:30`, `location.hash === ''`.
   Deliberate under the spec's junk rule and already disclosed (cycle 1 named
   the same path); it belongs in the sign-off, not in a patch. **Closed as a
-  truth defect** by the day-008 evening polish: `8a3baab` deleted the clause
+  truth defect** by the day-008 evening polish: `c1d86fc` deleted the clause
   and the README now says what Back does. The behaviour is unchanged.
